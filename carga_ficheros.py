@@ -1,40 +1,43 @@
-#He cogido el XML 
+# Choose XML
 
 import os
-import xml.etree.ElementTree as et 
+import xml.etree.ElementTree as Et
 import pandas as pd
 import numpy
 
-#Pareamos los datos a partir del fichero XML
+# Pair the data from an XML file
 carlos = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Prueba/AquaSearch/1'
-file = 'peaklist.xml'
+afile = 'peaklist.xml'
 
-path_ = os.path.join(carlos,file)
+path_ = os.path.join(carlos, afile)
 
 def parse_xml(path_):
-    #Cojo las 2 columnas de mz e intensidad, aunque se podrian coger mas
-    df_cols = ["mass","intensity"] 
+    # Select mz and intensity columns, could take more if needed
+    df_cols = ["mass", "intensity"]
     rows = []
 
-    xtree = et.parse(path_)
+    xtree = Et.parse(path_)
     xroot = xtree.getroot() 
 
     for node in xroot: 
         s_mass = node.find("mass").text if node is not None else None
         s_int = node.find('absi').text if node is not None else None
     
-        rows.append({"mass": s_mass,"intensity": s_int})
+        rows.append({"mass": s_mass, "intensity": s_int})
 
-    out_df = pd.DataFrame(rows, columns = df_cols)
+    out_df = pd.DataFrame(rows, columns=df_cols)
     out_df = out_df.astype(float)
     
-    mz_int = numpy.array([pd.DataFrame.to_numpy(out_df.loc[:,'mass']),pd.DataFrame.to_numpy(out_df.loc[:,'intensity'])])
+    mz_int = numpy.array([pd.DataFrame.to_numpy(out_df.loc[:, 'mass']),
+                          pd.DataFrame.to_numpy(out_df.loc[:, 'intensity'])
+                          ])
     mz_int = numpy.transpose(mz_int)
-    return out_df,mz_int
+    return out_df, mz_int
 
-df,mz_int = parse_xml(path_)
 
-########TAMBIEN DEJO LA OPCION DE HACERLO A PARTIR DE EXCEL#######
+df, mz_int = parse_xml(path_)
+
+# #######ALSO LET THE OPTION TO DO IT FROM EXCEL#######
 
 # import os
 # import pandas as pd
@@ -47,7 +50,7 @@ df,mz_int = parse_xml(path_)
 # def parse_excel(path_):
 #     df = pd.read_excel(path_,header=2)
 
-#     #Cojo la columna de mz, intensidad y area para comparar con la database 
+#     # Select mz, intensity and area columns to compare with database
 #     df_2 = df[['m/z','Intens.','Area']]
 
 #     mz_int = numpy.array([pd.DataFrame.to_numpy(df_2.loc[:,'m/z']),pd.DataFrame.to_numpy(df_2.loc[:,'Intens.'])])
@@ -56,6 +59,6 @@ df,mz_int = parse_xml(path_)
 
 # df,mz_int = parse_excel(path_)
 
-########TAMBIEN DEJO LA OPCION DE HACERLO A PARTIR DE EXCEL#######
+# #######ALSO LET THE OPTION TO DO IT FROM EXCEL#######
 
-#Aquí habría que hacer la consulta a Live SQL 
+# Here, we should consult Live SQL

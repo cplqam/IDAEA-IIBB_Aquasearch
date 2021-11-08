@@ -1,11 +1,11 @@
 from typing import List 
 from typing import Tuple 
 import numba
-import numpy
+import numpy as np
 
 
 @numba.njit 
-def collect_peak_pairs(spec1: numpy.ndarray, spec2: numpy.ndarray,
+def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray,
                        tolerance: float, shift: float = 0, mz_power: float = 0.0,
                        intensity_power: float = 1.0):
     # pylint: disable=too-many-arguments
@@ -13,11 +13,11 @@ def collect_peak_pairs(spec1: numpy.ndarray, spec2: numpy.ndarray,
     Args
     ----
     spec1:
-        Spectrum peaks and intensities as numpy array.
+        Spectrum peaks and intensities as np array.
     spec2:
-        Spectrum peaks and intensities as numpy array.
+        Spectrum peaks and intensities as np array.
     tolerance
-        Peaks will be considered a match when <= tolerance appart.
+        Peaks will be considered a match when <= tolerance apart.
     shift
         Shift spectra peaks by shift. The default is 0.
     mz_power:
@@ -27,7 +27,7 @@ def collect_peak_pairs(spec1: numpy.ndarray, spec2: numpy.ndarray,
         The power to raise intensity to in the cosine function. The default is 1.
     Returns
     -------
-    matching_pairs : numpy array
+    matching_pairs : np array
         Array of found matching peaks.
     """
     matches = find_matches(spec1[:, 0], spec2[:, 0], tolerance, shift) 
@@ -40,11 +40,11 @@ def collect_peak_pairs(spec1: numpy.ndarray, spec2: numpy.ndarray,
         power_prod_spec1 = (spec1[idx, 0] ** mz_power) * (spec1[idx, 1] ** intensity_power) 
         power_prod_spec2 = (spec2[idx2[i], 0] ** mz_power) * (spec2[idx2[i], 1] ** intensity_power)
         matching_pairs.append([idx1[i], idx2[i], power_prod_spec1 * power_prod_spec2])
-    return numpy.array(matching_pairs.copy())
+    return np.array(matching_pairs.copy())
 
 
 @numba.njit
-def find_matches(spec1_mz: numpy.ndarray, spec2_mz: numpy.ndarray,
+def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray,
                  tolerance: float, shift: float = 0) -> List[Tuple[int, int]]:
     """Faster search for matching peaks.
     Makes use of the fact that spec1 and spec2 contain ordered peak m/z (from
@@ -52,11 +52,11 @@ def find_matches(spec1_mz: numpy.ndarray, spec2_mz: numpy.ndarray,
     Parameters
     ----------
     spec1_mz:
-        Spectrum peak m/z values as numpy array. Peak mz values must be ordered.
+        Spectrum peak m/z values as np array. Peak mz values must be ordered.
     spec2_mz:
-        Spectrum peak m/z values as numpy array. Peak mz values must be ordered.
+        Spectrum peak m/z values as np array. Peak mz values must be ordered.
     tolerance
-        Peaks will be considered a match when <= tolerance appart.
+        Peaks will be considered a match when <= tolerance apart.
     shift
         Shift peaks of second spectra by shift. The default is 0.
     Returns
@@ -82,63 +82,67 @@ def find_matches(spec1_mz: numpy.ndarray, spec2_mz: numpy.ndarray,
 
 
 @numba.njit(fastmath=True)
-def score_best_matches(matching_pairs: numpy.ndarray, spec1: numpy.ndarray, #esta función proporciona unos scores de los mejores 
-                       spec2: numpy.ndarray, mz_power: float = 0.0,
+# this function provides some of the best scores
+def score_best_matches(matching_pairs: np.ndarray, spec1: np.ndarray, 
+                       spec2: np.ndarray, mz_power: float = 0.0,
                        intensity_power: float = 1.0) -> Tuple[float, int]:
-    """Calculate cosine-like score by multiplying matches. Does require a sorted
-    list of matching peaks (sorted by intensity product)."""
+    """Calculate cosine-like score by multiplying matches.
+    Does require a sorted list of matching peaks (sorted by intensity product).
+    """
     score = float(0.0)
     used_matches = int(0)
     used1 = set()
     used2 = set()
-    rep = numpy.empty((0, 3), int)
+    rep = np.empty((0, 3), int)
 
     for i in range(matching_pairs.shape[0]):    
         mz_1 = matching_pairs[i, 0]
         mz_2 = matching_pairs[i, 1]
         s = matching_pairs[i, 2]
-        #Si solo aparece 1 vez el pico, se añade directamente al score
-        if numpy.count_nonzero(matching_pairs[:, 0] == mz_1) == 1 and numpy.count_nonzero(matching_pairs[:, 1] == mz_2) == 1:
+        # If the peak only appears 1 time, it is added directly to the score
+        if np.count_nonzero(matching_pairs[:, 0] == mz_1) == 1 and np.count_nonzero(matching_pairs[:, 1] == mz_2) == 1:
             score += matching_pairs[i, 2] 
             used1.add(matching_pairs[i, 0])  
             used2.add(matching_pairs[i, 1])  
             used_matches += 1
-        #Sino, no se añade al score sino a un array donde estarán los repetidos    
+        # If not, it is added to an array where the repeats will be
         else:
-            rep = numpy.append(rep, numpy.array([[mz_1, mz_2, s]]), axis=0)
+            rep = np.append(rep, np.array([[mz_1, mz_2, s]]), axis=0)
         
-    rep_def = numpy.empty((0, 3), int)
+    rep_def = np.empty((0, 3), int)
     
-    #Dentro de los repetidos
+    # Within the repeated
     for i in range(rep.shape[0]):
         mz_1 = rep[i, 0]
         mz_2 = rep[i, 1]
         s = rep[i, 2]
-        if i == 0: #Si es el 1 elemento, entra en el array definitivo
-            rep_def = numpy.append(rep_def, numpy.array([[mz_1, mz_2, s]]), axis=0)
-        else: #Si no es el primero
-            #Se mira que no haya ningun mz igual en la lista, de ninguno de los 2 spectros
-            
-            #Si no está el mismo mz
-            if numpy.count_nonzero(rep_def[:, 0] == mz_1) == 0 and numpy.count_nonzero(rep_def[:, 1] == mz_2) == 0:
-                #Entran en el array definitivo
-                rep_def = numpy.append(rep_def, numpy.array([[mz_1, mz_2, s]]), axis=0)
+        if i == 0:
+            # If it is the 1 element, it enters the definitive array
+            rep_def = np.append(rep_def, np.array([[mz_1, mz_2, s]]), axis=0)
+        else: 
+            # If it is not the first, it is checked that there is no equal mz in the list, of any of the 2 spectra
+            # If there is not the same mz
+            if np.count_nonzero(rep_def[:, 0] == mz_1) == 0 and np.count_nonzero(rep_def[:, 1] == mz_2) == 0:
+                # They enter the final array
+                rep_def = np.append(rep_def, np.array([[mz_1, mz_2, s]]), axis=0)
                 
-            #Si ya hay un mz igual en la lista, comparo los scores y dejo en esa posisción del array el mejor
-            elif numpy.count_nonzero(rep_def[:, 0] == mz_1) != 0: #Lo comparo con el 1 dato, si el 1 está:
-                rep1 = numpy.where(rep_def[:,0] == mz_1) #Saco su index
-                if s > rep_def[rep1, 2]: #Si es mejor su score se sustituyen los valores para quedarnos con el mejor score de cada señal
-                    rep_def[rep1,0] = mz_1
-                    rep_def[rep1,1] = mz_2
-                    rep_def[rep1,2] = s
+            # If there is already an equal mz in the list,
+            # I compare the scores and leave the best one in that position of the array
+            elif np.count_nonzero(rep_def[:, 0] == mz_1) != 0:  # Compare with first data, if the first is:
+                rep1 = np.where(rep_def[:, 0] == mz_1)           # Get the index
+                # If its score is better, the values are replaced to get the best score for each signal
+                if s > rep_def[rep1, 2]:
+                    rep_def[rep1, 0] = mz_1
+                    rep_def[rep1, 1] = mz_2
+                    rep_def[rep1, 2] = s
             
-            elif numpy.count_nonzero(rep_def[:, 1] == mz_2) != 0: #Se hace lo mismo para el segundo mz
-            #De esta forma si hubiese coincidencia en los 2 mz, se quedaría con el mejor de los 3 (las 2 coincidencias mas el nuevo)
-                rep2 = numpy.where(rep_def[:,1] == mz_2)
+            elif np.count_nonzero(rep_def[:, 1] == mz_2) != 0:  # The same is done for the second mz
+                # If the two mz match, then it would take the best of the 3 (the two matches and the new one)
+                rep2 = np.where(rep_def[:, 1] == mz_2)
                 if s > rep_def[rep2, 2]:
-                    rep_def[rep2,0] = mz_1
-                    rep_def[rep2,1] = mz_2
-                    rep_def[rep2,2] = s
+                    rep_def[rep2, 0] = mz_1
+                    rep_def[rep2, 1] = mz_2
+                    rep_def[rep2, 2] = s
 
     for i in range(rep_def.shape[0]): 
         score += rep_def[i, 2] 
@@ -146,11 +150,9 @@ def score_best_matches(matching_pairs: numpy.ndarray, spec1: numpy.ndarray, #est
         used2.add(rep_def[i, 1])  
         used_matches += 1         
 
-    #Normalize score:
+    # Normalize score:
     spec1_power = spec1[:, 0] ** 0 * spec1[:, 1] ** 1
     spec2_power = spec2[:, 0] ** 0 * spec2[:, 1] ** 1
 
-    score = score/(numpy.sum(spec1_power ** 2) ** 0.5 * numpy.sum(spec2_power ** 2) ** 0.5)
+    score = score/(np.sum(spec1_power ** 2) ** 0.5 * np.sum(spec2_power ** 2) ** 0.5)
     return score, used_matches
-
-
