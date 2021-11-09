@@ -34,8 +34,8 @@ def parse_xml(path_):
     mz_int = numpy.transpose(mz_int)
     return out_df, mz_int
 
-
-df, mz_int = parse_xml(path_)
+if __name__ == '__main__':
+    df, mz_int = parse_xml(path_)
 
 # #######ALSO LET THE OPTION TO DO IT FROM EXCEL#######
 
@@ -57,7 +57,8 @@ df, mz_int = parse_xml(path_)
 #     mz_int = numpy.transpose(mz_int)
 #     return df_2,mz_int
 
-# df,mz_int = parse_excel(path_)
+#if __name__ == '__main__':
+#   df,mz_int = parse_excel(path_)
 
 # #######ALSO LET THE OPTION TO DO IT FROM EXCEL#######
 
