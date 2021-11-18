@@ -5,12 +5,6 @@ import xml.etree.ElementTree as Et
 import pandas as pd
 import numpy
 
-# Pair the data from an XML file
-carlos = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Prueba/AquaSearch/1'
-afile = 'peaklist.xml'
-
-path_ = os.path.join(carlos, afile)
-
 def parse_xml(path_):
     # Select mz and intensity columns, could take more if needed
     df_cols = ["mass", "intensity"]
@@ -34,7 +28,14 @@ def parse_xml(path_):
     mz_int = numpy.transpose(mz_int)
     return out_df, mz_int
 
+#To test the function
 if __name__ == '__main__':
+    # Pair the data from an XML file
+    carlos = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Datos_Ester/MALDI_Bruker_Files/MALDI_Bruker/mcE61/mcE61_Banyolas/0_G5/1/1SRef/pdata/1'
+    afile = 'peaklist.xml'
+
+    path_ = os.path.join(carlos, afile)
+    
     df, mz_int = parse_xml(path_)
 
 # #######ALSO LET THE OPTION TO DO IT FROM EXCEL#######
@@ -62,4 +63,4 @@ if __name__ == '__main__':
 
 # #######ALSO LET THE OPTION TO DO IT FROM EXCEL#######
 
-# Here, we should consult Live SQL
+
