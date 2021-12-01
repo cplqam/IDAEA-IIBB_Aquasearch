@@ -68,10 +68,10 @@ def protein_information(df, datab = 'Aquasearch_study', table = 'protein_diccion
     group = df['Protein Group Accessions'].unique()
     name = {}
     organ = {}
-    c= 0
+    #c= 0
     for prot in group:
-        c = c+1
-        print(c)
+        #c = c+1
+        #print(c)
         protein = prot.split(';')
         l_n = ''
         l_o = ''
@@ -98,6 +98,7 @@ def protein_information(df, datab = 'Aquasearch_study', table = 'protein_diccion
     name_o = table_complete(df,organ)
     df['Protein Name'] = name_p
     df['Organism Name'] = name_o
+    
     
     return df
 
