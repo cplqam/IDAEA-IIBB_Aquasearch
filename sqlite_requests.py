@@ -1,55 +1,69 @@
-import carga_ficheros
+import load_archives
 import os
 import sqlite3 as sql
 
 def create_db(name):
-    """"This fuction creates a new database in SQLite3:
-        name: a string variable, it is the name we want to assign to the new DB """
+    """"Creates a new SQLite3 database.
+
+        name: string. Name we want to assign to the DB
+    """
+
     cone = sql.connect(name)
     cone.commit()
     cone.close()
     
-#To create a protein diccionary
+# To create a protein dictionary
 def create_table_proteins_dic(name, table_n):
-    """"This fuction creates a new table in a databese:
-        name: a string variable, it is the name of the DB 
-        table_n, a string variable, it is the name of the diccionary"""
+    """"Creates a new table in the database.
+
+        name: string. Name of the DB
+        table_n: string. Name of the dictionary
+    """
+
     conn = sql.connect(name)
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE " + table_n + "(Accession text, Protein name text, Organism text)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS" + table_n + "(Accession text, Protein name text, Organism text)")
     conn.commit()
     conn.close()
 
-def df2ListOfTubles_proteins_dic(df):
-    """This function provides the transformation of the dataframe format (output of parse_zml function from 
-        carga_ficheros.py) to lost of tuples for inserting the information into the table"""
+def df_2_list_of_tuples_proteins_dict(df):
+    """Provides the transformation of the dataframe format (output of parse_zml function from
+        load_archives.py) to list of tuples for inserting the information into the table.
+    """
+
     out_list = []
     for i in range(df.shape[0]):
-        acces = df.iloc[i, 0]
-        prot_n= df.iloc[i, 1]
+        access = df.iloc[i, 0]
+        prot_n = df.iloc[i, 1]
         org = df.iloc[i, 2]
-        tup = (acces, prot_n, org)
+        tup = (access, prot_n, org)
         out_list.append(tup)
     return out_list
 
-def insertProtCode(name, table_n, df):
-    """"This fuction complete a table in a databese:
-        name: a string variable, it is the name of the DB 
-        table_n, a string variable, it is the name of the diccionary
-        df: a list of tuples, it contains the accession code, protein name and organism"""
+def insert_prot_code(name, table_n, df):
+    """"Completes a table in a database.
+
+        name: string. The name of the DB.
+        table_n: string. The name of the dictionary.
+        df: list of tuples. Contains the accession code, protein name and organism.
+    """
+
     conn = sql.connect(name)
-    df_def = df2ListOfTubles_proteins_dic(df)
+    df_def = df_2_list_of_tuples_proteins_dict(df)
     cursor = conn.cursor()
     instruction = f"INSERT INTO " + table_n + " VALUES (?,?,?)" 
-    cursor.executemany(instruction,df_def)
+    cursor.executemany(instruction, df_def)
     conn.commit()
     conn.close()
     
-def table_request_protDic(name, table_n, code):
-    """"This fuction provides to do a request to get information from the protein diccionary:
-        name: a string variable, it is the name of the DB 
-        table_n, a string variable, it is the name of the diccionary
-        code: a string variable, it is the uniprot code of the protein"""
+def table_request_prot_dict(name, table_n, code):
+    """"Performs a request to get information from the protein dictionary.
+
+        name: string. The ame of the DB.
+        table_n, string. The name of the dictionary.
+        code: string. The uniprot code of the protein.
+    """
+
     conn = sql.connect(name)
     cursor = conn.cursor()
     cursor.execute("SELECT Protein name, Organism FROM " + table_n + "  WHERE Accession = '" + code + "'")
@@ -58,21 +72,26 @@ def table_request_protDic(name, table_n, code):
     return datos
 
 
-#To introduce a spectrum of reference
+# To introduce a spectrum of reference
 def create_table_organism(name, organism, protein):
-    """"This fuction creates a new table in a databese:
-        name: a string variable, it is the name of the DB 
-        organism: a string variable, it is the name of the organism the data came from
-        protein: a string vriable, it is the name of the identified protein"""
+    """"Creates a new database table.
+
+        name: string. The name of the DB.
+        organism: string. The name of the organism the data came from.
+        protein: string. The name of the identified protein.
+    """
+
     conn = sql.connect(name)
     cursor = conn.cursor()
     cursor.execute("CREATE TABLE " + organism + "_" + protein + "(mz integer, intensity integer)")
     conn.commit()
     conn.close()
     
-def df2ListOfTubles(df):
-    """This function provides the transformation of the dataframe format (output of parse_zml function from 
-        carga_ficheros.py) to lost of tuples for inserting the information into the table"""
+def df_2_list_of_tuples(df):
+    """Transforms the dataframe format (output of parse_zml function from load_archives.py)
+       to lost of tuples for inserting the information into the table.
+    """
+
     out_list = []
     for i in range(df.shape[0]):
         mz = int(df.iloc[i, 0])
@@ -82,26 +101,32 @@ def df2ListOfTubles(df):
     return out_list
 
 
-def insertSpectrum(name, organism, protein, df):
-    """"This fuction complete a table in a databese:
-        name: a string variable, it is the name of the DB 
-        organism: a string variable, it is the name of the organism the data came from
-        protein: a string vriable, it is the name of the identified protein
-        df: a list of tuples, it contains the mz and intensity values of the spectrum"""
+def insert_spectrum(name, organism, protein, df):
+    """"Completes a table in a database.
+
+        name: string. The name of the DB.
+        organism: string. The name of the organism the data came from.
+        protein: string. The name of the identified protein.
+        df: list of tuples. Contains the mz and intensity values of the spectrum.
+    """
+
     conn = sql.connect(name)
-    df_def = df2ListOfTubles(df)
+    df_def = df_2_list_of_tuples(df)
     cursor = conn.cursor()
     instruction = f"INSERT INTO " + organism + "_" + protein + " VALUES (?,?)" 
-    cursor.executemany(instruction,df_def)
+    cursor.executemany(instruction, df_def)
     conn.commit()
     conn.close()
     
     
-def table_request_prueba(name, table_n, code):
-    """"This fuction provides to do a request to get information from the protein diccionary:
-        name: a string variable, it is the name of the DB 
-        table_n, a string variable, it is the name of the diccionary
-        code: a string variable, it is the uniprot code of the protein"""
+def table_request_test(name, table_n, code):
+    """"Perform a request to get information from the protein dictionary.
+
+        name: string. The name of the DB.
+        table_n: string. The name of the dictionary.
+        code: string. Uniprot code of the protein.
+    """
+
     conn = sql.connect(name)
     cursor = conn.cursor()
     cursor.execute("SELECT intensity FROM " + table_n + "  WHERE mz = " + code + "")
@@ -109,15 +134,15 @@ def table_request_prueba(name, table_n, code):
     conn.close()
     return datos
 
-#To test the functions
+# To test the functions
 # if __name__ == '__main__':
 #     a = input('Is this a new database? (yes/no): ')
 #     if a == 'yes': 
-#         create_db('reference_spectrums')
+#         create_db('reference_spectra')
         
 #     b = input('Is this a new table? (yes/no): ')
 #     if b == 'yes': 
-#         create_table('reference_spectrums', 'pig', 'albumin')
+#         create_table('reference_spectra', 'pig', 'albumin')
     
 #         carlos = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Prueba/AquaSearch/1'
 #         afile = 'peaklist.xml'
@@ -126,6 +151,6 @@ def table_request_prueba(name, table_n, code):
     
 #         df, mz_int = carga_ficheros.parse_xml(path_)
     
-#     insertSpectrum('reference_spectrums', 'pig', 'albumin', df)
+#     insert_spectrum('reference_spectra', 'pig', 'albumin', df)
 
     

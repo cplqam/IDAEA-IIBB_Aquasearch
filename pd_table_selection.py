@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-import PD_table_complete as pdis
+import pd_table_complete as pdis
 from collections import Counter
 
 def organism_selection(df):

@@ -28,7 +28,8 @@ def parse_xml(path_):
     mz_int = numpy.transpose(mz_int)
     return out_df, mz_int
 
-#To test the function
+
+# To test the function
 if __name__ == '__main__':
     # Pair the data from an XML file
     carlos = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Datos_Ester/MALDI_Bruker_Files/MALDI_Bruker/mcE61/mcE61_Banyolas/0_G5/1/1SRef/pdata/1'
@@ -58,9 +59,7 @@ if __name__ == '__main__':
 #     mz_int = numpy.transpose(mz_int)
 #     return df_2,mz_int
 
-#if __name__ == '__main__':
+# if __name__ == '__main__':
 #   df,mz_int = parse_excel(path_)
 
 # #######ALSO LET THE OPTION TO DO IT FROM EXCEL#######
-
-
