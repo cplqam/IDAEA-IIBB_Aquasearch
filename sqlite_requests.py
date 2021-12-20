@@ -22,7 +22,7 @@ def create_table_proteins_dic(name, table_n):
 
     conn = sql.connect(name)
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS" + table_n + "(Accession text, Protein name text, Organism text)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS " + table_n + "(Accession text, Protein name text, Organism text)")
     conn.commit()
     conn.close()
 

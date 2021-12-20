@@ -1,16 +1,15 @@
-import pandas as pd
 import os
 import pd_table_complete as pdis
 from collections import Counter
 
-def organism_selection(df):
+def organism_selection(path__):
     """This function completes the peptide output from Proteime Discoverer with the protein and organism they belong
         to, and it selects 1 option among the options of the non-unique peptides
         
         INPUT
-        df: a dataframe variable, the imported peptide output from Proteime Discoverer"""
+        path__: string. The path of the peptide output from Proteome Discoverer"""
         
-    df = pdis.protein_information(df)
+    df = pdis.protein_information(path__)
     
     all_species = []
     species = list(df['Organism Name'])
@@ -40,7 +39,7 @@ def most_abundant_entry_selection(x, frec_organism):
     """This function selects the peptide chosen among all non-unique options depending on the representation of the organism 
         the peptide belong to
         INPUT
-        x: the data frame result from "PD_table_complete.protein_information.py" with the protein options for the peptides
+        x: the data frame result from "pd_table_complete.protein_information.py" with the protein options for the peptides
         frec_organism: the sorted list of the organisms depending on their representation
         """
         
@@ -106,6 +105,5 @@ if __name__ == '__main__':
 
     excel = 'mcE61_Figueres_01_peptides_2.xlsx'
     afile = os.path.join(path_, excel) 
-    df = pd.read_excel(afile)
     
-    df_sel = organism_selection(df)
+    df_sel = organism_selection(afile)

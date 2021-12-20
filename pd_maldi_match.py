@@ -52,16 +52,18 @@ def maldi_ident_join(dictionary, maldi):
     size = mz_maldi.shape[0]
     alist = ['-'] * size
 
-    df = pd.DataFrame({'mz': maldi[:, 0], 'intensity': maldi[:, 1], 'Protein': alist, 'Organism': alist})
+    df = pd.DataFrame({'mz': maldi[:, 0], 'intensity': maldi[:, 1], 'Protein': alist, 'Organism': alist, 'Protein Accession code': alist})
 
     for mz_k in dic_keys:
         p_o = dictionary[mz_k][0].split('|')
         prot = p_o[0]
         org = p_o[1]
+        cod = p_o[2]
     
         pos = numpy.where( mz_maldi == mz_k)
         df.loc[pos[0], 'Protein'] = prot
         df.loc[pos[0], 'Organism'] = org
+        df.loc[pos[0], 'Protein Accession code'] = cod
     return df
 
 
@@ -83,9 +85,8 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=10, ppm=100, unique_=1):
     """
     
     df, mz_int = load_archives.parse_xml(xml_)
-    identifications = pd.read_excel(excel)
-    identifications = pd_table_selection.organism_selection(identifications)
-    df_ident, list_ident = complete_table_proteins(prot_ident, n_)
+    identifications = pd_table_selection.organism_selection(ident_pep)
+    df_ident, list_ident = complete_table_proteins(ident_prot, n_)
 
     dictionary = {}
 
@@ -103,7 +104,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=10, ppm=100, unique_=1):
                     ppm_calculated = (1 - (mz_xml / mz_ident[0])) * 1000000
     
                 if ppm_calculated <= ppm:
-                    app = identifications.loc[j, 'Protein Name'] + '|' + identifications.loc[j, 'Organism Name']
+                    app = identifications.loc[j, 'Protein Name'] + '|' + identifications.loc[j, 'Organism Name'] + '|' + identifications.loc[j, 'Protein Group Accessions']
                     list_po.append(app)
                     
             elif unique_ == 0:
@@ -113,7 +114,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=10, ppm=100, unique_=1):
                     ppm_calculated = (1 - (mz_xml / mz_ident[0])) * 1000000
     
                 if ppm_calculated <= ppm:
-                    app = identifications.loc[j, 'Protein Name'] + '|' + identifications.loc[j, 'Organism Name']
+                    app = identifications.loc[j, 'Protein Name'] + '|' + identifications.loc[j, 'Organism Name'] + '|' + identifications.loc[j, 'Protein Group Accessions']
                     list_po.append(app)
     
         if len(list_po) >= 2:
