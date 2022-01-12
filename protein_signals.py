@@ -120,9 +120,10 @@ def table_request(protein_code, signals, ppm=100, db='Aquasearch_study'):
             
             for i2 in range(len(table)):
                 mz_t = table.iloc[i2, 0]
-                
-                if mz_t <= max_mz_ppm and mz_t >= min_mz_ppm:
+
+                if max_mz_ppm >= mz_t >= min_mz_ppm:
                     c =+ 1
+
             if c == 0:
                 new_mz.append(round(mz_s, 4))
                 new_int.append(int_s)            
