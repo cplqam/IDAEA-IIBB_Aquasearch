@@ -116,13 +116,13 @@ def table_request(protein_code, signals, ppm=100, db='Aquasearch_study'):
             
             min_mz_ppm = mz_s-((ppm/1000000)*mz_s)
             max_mz_ppm = (ppm/1000000)*mz_s+mz_s
-            c = 0                      
-            
+
+            c = 0
             for i2 in range(len(table)):
                 mz_t = table.iloc[i2, 0]
 
                 if max_mz_ppm >= mz_t >= min_mz_ppm:
-                    c =+ 1
+                    c += 1
 
             if c == 0:
                 new_mz.append(round(mz_s, 4))
