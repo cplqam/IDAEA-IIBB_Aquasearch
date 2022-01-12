@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import urllib 
 import sqlite_requests as sr
+import sqlite3
 
 # This function provides a information fom uniprot about a protein
 def uniprot_information(accession):
@@ -64,7 +65,11 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
         sr.create_db(db)
     
     # Try to create a table if it doesn't exist
-    sr.create_table_proteins_dic(db, table)
+    try:
+        sr.create_table_proteins_dic(db, table)
+    except sqlite3.OperationalError:
+        pass
+    
 
     group = df.loc[:,'Protein Group Accessions'].unique()
     name = {}
@@ -106,7 +111,7 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
     # Remove any possible exception because the uniprot code is unavailable 
     if len(exception_list) > 0:
         exception_list = list(dict.fromkeys(exception_list))
-        print('These protein accesion codes are not recognized by Uniprot an therefore, they have been deleted from peptide file: ' +  ', '.join(exception_list)) 
+        print('These protein accesion codes are not recognized by Uniprot and therefore, they have been eliminated from the peptide file: ' +  ', '.join(exception_list)) 
     
         for exception_p in exception_list:
             for n in range(df.shape[0]):

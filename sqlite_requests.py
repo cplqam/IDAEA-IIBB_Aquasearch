@@ -73,7 +73,8 @@ def table_request_prot_dict(name, table_n, code):
 
 
 # To introduce a spectrum of reference
-def create_table_organism(name, organism, protein):
+
+def create_table_protein(name, protein_code):
     """"Creates a new database table.
 
         name: string. The name of the DB.
@@ -83,9 +84,22 @@ def create_table_organism(name, organism, protein):
 
     conn = sql.connect(name)
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE " + organism + "_" + protein + "(mz integer, intensity integer)")
+    cursor.execute("CREATE TABLE " + protein_code + "(mz real, intensity real)")
     conn.commit()
     conn.close()
+    
+def eliminate_table(name, table_n):
+    """"Eliminates a new database table.
+
+        name: string. The name of the DB.
+        table_n: string. The name of the table.
+    """
+    conn = sql.connect(name)
+    cursor = conn.cursor()
+    cursor.execute("DROP TABLE " + table_n)
+    conn.commit()
+    conn.close()
+    
     
 def df_2_list_of_tuples(df):
     """Transforms the dataframe format (output of parse_zml function from load_archives.py)
@@ -94,32 +108,30 @@ def df_2_list_of_tuples(df):
 
     out_list = []
     for i in range(df.shape[0]):
-        mz = int(df.iloc[i, 0])
+        mz = float(df.iloc[i, 0])
         intensity = int(df.iloc[i, 1])
         tup = (mz, intensity)
         out_list.append(tup)
     return out_list
 
 
-def insert_spectrum(name, organism, protein, df):
+def insert_spectrum(name, df, table_n):
     """"Completes a table in a database.
 
         name: string. The name of the DB.
-        organism: string. The name of the organism the data came from.
-        protein: string. The name of the identified protein.
+        table_n: string. The name of the table.
         df: list of tuples. Contains the mz and intensity values of the spectrum.
     """
 
     conn = sql.connect(name)
     df_def = df_2_list_of_tuples(df)
     cursor = conn.cursor()
-    instruction = f"INSERT INTO " + organism + "_" + protein + " VALUES (?,?)" 
+    instruction = f"INSERT INTO " + table_n + " VALUES (?,?)" 
     cursor.executemany(instruction, df_def)
     conn.commit()
-    conn.close()
-    
-    
-def table_request_test(name, table_n, code):
+    conn.close()    
+
+def table_download(name, table_n):
     """"Perform a request to get information from the protein dictionary.
 
         name: string. The name of the DB.
@@ -128,11 +140,12 @@ def table_request_test(name, table_n, code):
     """
 
     conn = sql.connect(name)
-    cursor = conn.cursor()
-    cursor.execute("SELECT intensity FROM " + table_n + "  WHERE mz = " + code + "")
-    datos = cursor.fetchall()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM " + table_n)
+    datos = cur.fetchall()
     conn.close()
     return datos
+
 
 # To test the functions
 # if __name__ == '__main__':
