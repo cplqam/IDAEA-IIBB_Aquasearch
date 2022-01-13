@@ -70,7 +70,6 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
         sr.create_table_proteins_dic(db, table)
     except sqlite3.OperationalError:
         pass
-    
 
     group = df.loc[:, 'Protein Group Accessions'].unique()
     name = {}
@@ -85,6 +84,7 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
         for p in protein:
             data = sr.table_request_prot_dict(db, table, p)
             if len(data) == 0:
+                # noinspection PyUnresolvedReferences
                 try:
                     n, o = uniprot_information(p)
                     df_u = pd.DataFrame({'Accession': [p], 'Protein name': [n], 'Organism': [o]})
@@ -96,9 +96,8 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
                     protein
                     protein.remove(p)
                     if len(protein) > 1:
-                           prot = ';'.join(protein)
-                
-                     
+                        prot = ';'.join(protein)
+
             else:
                 n = data[0][0]
                 o = data[0][1]
@@ -112,7 +111,7 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
     # Remove any possible exception because the uniprot code is unavailable 
     if len(exception_list) > 0:
         exception_list = list(dict.fromkeys(exception_list))
-        print('These protein accesion codes are not recognized by Uniprot and therefore, they have been eliminated from the peptide file: ' +  ', '.join(exception_list)) 
+        print('These protein accesion codes are not recognized by Uniprot and therefore, they have been eliminated from the peptide file: ' + ', '.join(exception_list))
     
         for exception_p in exception_list:
             for n in range(df.shape[0]):
@@ -137,7 +136,7 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
         df['Organism Name'] = name_o
         
         df.reset_index(inplace=True, drop=False) 
-        df = df.drop('index', axis = 1)
+        df = df.drop('index', axis=1)
     return df
 
 
