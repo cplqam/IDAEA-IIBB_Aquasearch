@@ -1,8 +1,9 @@
 import pandas as pd 
 import os
-import urllib 
+import urllib.request as ur
 import sqlite_requests as sr
 import sqlite3
+
 
 # This function provides a information fom uniprot about a protein
 def uniprot_information(accession):
@@ -12,7 +13,7 @@ def uniprot_information(accession):
         accession: string. the Uniprot peptide accession code
     """
 
-    data = urllib.request.urlopen("https://www.uniprot.org/uniprot/%s.txt" % accession).read()
+    data = ur.urlopen("https://www.uniprot.org/uniprot/%s.txt" % accession).read()
     data = str(data)
     data = data.split('\\n')
     organism = ''
@@ -90,7 +91,7 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
                     l_n = l_n + '|' + str(n)
                     l_o = l_o + '|' + str(o)
                     sr.insert_prot_code(db, table, df_u)
-                except urllib.request.HTTPError:
+                except ur.HTTPError:
                     exception_list.append(p)
                     protein
                     protein.remove(p)
