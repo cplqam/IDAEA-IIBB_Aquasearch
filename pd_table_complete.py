@@ -72,7 +72,7 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
         pass
     
 
-    group = df.loc[:,'Protein Group Accessions'].unique()
+    group = df.loc[:, 'Protein Group Accessions'].unique()
     name = {}
     organ = {}
     exception_list = []
@@ -116,7 +116,7 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
     
         for exception_p in exception_list:
             for n in range(df.shape[0]):
-                prot = df.loc[n,'Protein Group Accessions']
+                prot = df.loc[n, 'Protein Group Accessions']
                 protein = prot.split(';')
             
                 if exception_p in protein:
@@ -124,11 +124,11 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
                     c = 0
                     if len(protein) > 1:
                         protein = ';'.join(protein)
-                        df.loc[n,'Protein Group Accessions'] = protein
+                        df.loc[n, 'Protein Group Accessions'] = protein
                     elif len(protein) == 1:
-                        df.loc[n,'Protein Group Accessions'] = protein
+                        df.loc[n, 'Protein Group Accessions'] = protein
                     elif len(protein) == 0:
-                        df = df.drop(n-c,axis=0)
+                        df = df.drop(n-c, axis=0)
                         c += 1        
         
         name_p = table_complete(df, name)
