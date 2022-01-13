@@ -93,7 +93,6 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
                     sr.insert_prot_code(db, table, df_u)
                 except ur.HTTPError:
                     exception_list.append(p)
-                    protein
                     protein.remove(p)
                     if len(protein) > 1:
                         prot = ';'.join(protein)
