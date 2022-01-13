@@ -73,7 +73,7 @@ def table_request(protein_code, signals, ppm=100, db='Aquasearch_study'):
         mz_rounded = round(signals.loc[:, 'mz'], 4)
         table_new = pd.DataFrame({'mz': mz_rounded, 'intensity': signals.iloc[:, 1]})
     else:
-        table = pd.DataFrame(table)
+        table = pd.DataFrame(table, columns=['mz', 'intensity'])
         new_mz = []
         new_int = []
         
@@ -109,18 +109,15 @@ def table_request(protein_code, signals, ppm=100, db='Aquasearch_study'):
             max_int = df_d.iloc[:, 1].idxmax()
             new_mz.append(round(df_d.iloc[max_int, 0], 4))
             new_int.append(df_d.iloc[max_int, 1])
-            
-        for i in range(len(signals)):
-            mz_s = signals.iloc[i, 0]
-            int_s = signals.iloc[i, 1]
+             
+        for mz_s, int_s in zip(signals['mz'], signals['intensity']):
                         
             min_mz_ppm = mz_s-((ppm/1000000)*mz_s)
             max_mz_ppm = (ppm/1000000)*mz_s+mz_s
 
             c = False
-            for i2 in range(len(table)):
-                mz_t = table.iloc[i2, 0]
-
+            for mz_t in table['mz']:
+                
                 if max_mz_ppm >= mz_t >= min_mz_ppm:
                     c = True
                     break
