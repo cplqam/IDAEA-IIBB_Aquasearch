@@ -17,6 +17,7 @@ def uniprot_information(accession):
     data = str(data)
     data = data.split('\\n')
     organism = ''
+    name = None
     
     for i in data:
         n = i.split('=')
