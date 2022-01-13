@@ -145,25 +145,4 @@ def table_download(name, table_n):
     datos = cur.fetchall()
     conn.close()
     return datos
-
-
-# To test the functions
-# if __name__ == '__main__':
-#     a = input('Is this a new database? (yes/no): ')
-#     if a == 'yes': 
-#         create_db('reference_spectra')
-        
-#     b = input('Is this a new table? (yes/no): ')
-#     if b == 'yes': 
-#         create_table('reference_spectra', 'pig', 'albumin')
-    
-#         carlos = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Prueba/AquaSearch/1'
-#         afile = 'peaklist.xml'
-
-#         path_ = os.path.join(carlos, afile)
-    
-#         df, mz_int = carga_ficheros.parse_xml(path_)
-    
-#     insert_spectrum('reference_spectra', 'pig', 'albumin', df)
-
-    
+   

@@ -22,10 +22,10 @@ def parse_xml(path_):
     out_df = pd.DataFrame(rows, columns=df_cols)
     out_df = out_df.astype(float)
     
-    mz_int = numpy.array([pd.DataFrame.to_numpy(out_df.loc[:, 'mass']),
-                          pd.DataFrame.to_numpy(out_df.loc[:, 'intensity'])
-                          ])
-    mz_int = numpy.transpose(mz_int)
+    mz_s = out_df['mass'].squeeze()
+    int_s = out_df['intensity'].squeeze()
+
+    mz_int = numpy.array([mz_s, int_s]).transpose()
     return out_df, mz_int
 
 
