@@ -142,11 +142,5 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
 
 # To test the functions
 if __name__ == '__main__':
-    path_ = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Correo de Montse/Identificaciones'
-    path_2 = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/IDAEA-IIBB'
-    d = 'Protein_dic.xlsx'
-    excel = 'mcE61_Figueres_01_peptides.xlsx'
-        
-    afile = os.path.join(path_, excel) 
     
-    final = protein_information(afile)
+    final = protein_information('test_files/mcE61_PD14_Figueres_Peptides.xlsx')

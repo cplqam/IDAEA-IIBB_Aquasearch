@@ -1,5 +1,3 @@
-import load_archives
-import os
 import sqlite3 as sql
 
 def create_db(name):
@@ -84,7 +82,7 @@ def create_table_protein(name, protein_code):
 
     conn = sql.connect(name)
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE " + protein_code + "(mz real, intensity real)")
+    cursor.execute("CREATE TABLE " + protein_code + "(mz real, intensity real, relative_intensity real)")
     conn.commit()
     conn.close()
     
@@ -110,7 +108,8 @@ def df_2_list_of_tuples(df):
     for i in range(df.shape[0]):
         mz = float(df.iloc[i, 0])
         intensity = int(df.iloc[i, 1])
-        tup = (mz, intensity)
+        rel_int = float(df.iloc[i, 2])
+        tup = (mz, intensity, rel_int)
         out_list.append(tup)
     return out_list
 
@@ -126,7 +125,7 @@ def insert_spectrum(name, df, table_n):
     conn = sql.connect(name)
     df_def = df_2_list_of_tuples(df)
     cursor = conn.cursor()
-    instruction = f"INSERT INTO " + table_n + " VALUES (?,?)" 
+    instruction = f"INSERT INTO " + table_n + " VALUES (?,?,?)" 
     cursor.executemany(instruction, df_def)
     conn.commit()
     conn.close()    

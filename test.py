@@ -79,5 +79,5 @@ elif m == 'eg':
         ps.fill_table(code, test_pdmm, db='Aquasearch_study')
     
     table = sr.table_download('Aquasearch_study', code)
-    table = pd.DataFrame(table, columns=('mz', 'intensity'))
+    table = pd.DataFrame(table, columns=('mz', 'intensity', 'relative intensity'))
     print(table)

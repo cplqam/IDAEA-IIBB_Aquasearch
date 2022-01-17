@@ -43,6 +43,7 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study'):
             
     signals_inter = maldi_complete.iloc[idx, :]
     signals_inter = signals_inter.reset_index().drop(['index'], axis=1)
+    signals_inter = relat_intensity_calc(signals_inter)
     
     table_comprobation(protein_code)
     table_examined = table_request(protein_code, signals_inter)
@@ -51,7 +52,8 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study'):
     sr.insert_spectrum(db, table_examined, protein_code)
     
     
-def table_request(protein_code, signals, ppm=100, db='Aquasearch_study'):
+    
+def table_request(protein_code, signals, ppm=100, db = 'Aquasearch_study', choose = 0):
     """This function completes the table belonging to a protein accession code 
        with the new signals in the found in the new sample  
        
@@ -61,6 +63,10 @@ def table_request(protein_code, signals, ppm=100, db='Aquasearch_study'):
        ppm: integer. Maximum error allowed for considering two signal as the same. 
        By default ppm = 100
        db: string. The name of the DB. By default: Aquasearch_study
+       choose: integer.
+       choose = 0: if a new signal is considered as the same as an database signal (accorsing to ppm parameter)
+                   only the signal with more relative intensity are considered 
+       choose = 1: all the signals are introduced in the database  
        """
     try:
         table = sr.table_download(db, protein_code)
@@ -71,71 +77,115 @@ def table_request(protein_code, signals, ppm=100, db='Aquasearch_study'):
         
     if table_length == 0:  # If table is empty, the signals of interest are introduced
         mz_rounded = round(signals.loc[:, 'mz'], 4)
-        table_new = pd.DataFrame({'mz': mz_rounded, 'intensity': signals.iloc[:, 1]})
+        rel_int = round(signals.loc[:, 'relative intensity'], 2)
+        table_new = pd.DataFrame({'mz': mz_rounded, 'intensity': signals.iloc[:, 1], 'relative intensity': rel_int})
     else:
-        table = pd.DataFrame(table, columns=['mz', 'intensity'])
-        new_mz = []
-        new_int = []
+        if choose == 0:
+            table = pd.DataFrame(table, columns=['mz', 'intensity', 'relative intensity'])
+            new_mz = []
+            new_int = []
+            new_int_r = []
         
-        for i in range(len(table)):
-            mz_t = table.iloc[i, 0]
-            int_t = table.iloc[i, 1]
+            for mz_t, int_t, int_re_t in zip(table.iloc[:, 0], table.iloc[:, 1], table.iloc[:, 2]):
             
-            mz_d = []
-            int_d = []
+                mz_d = []
+                int_d = []
+                int_r_d = []
             
-            for i2 in range(len(signals)):
-                mz_s = signals.iloc[i2, 0]
-                int_s = signals.iloc[i2, 1]
-                
-                if mz_t > mz_s:
-                    ppm_calculated = (1 - (mz_s / mz_t)) * 1000000
-                elif mz_s >= mz_t:
-                    ppm_calculated = (1 - (mz_t / mz_s)) * 1000000
+                for mz_s, int_s, int_re_s in zip(signals.iloc[:,0], signals.iloc[:,1], signals.iloc[:,5]):
                     
-                if ppm_calculated <= ppm:
-                    if int_t >= int_s:
+                    if mz_t > mz_s:
+                        ppm_calculated = (1 - (mz_s / mz_t)) * 1000000
+                    elif mz_s >= mz_t:
+                        ppm_calculated = (1 - (mz_t / mz_s)) * 1000000
+                    
+                    if ppm_calculated <= ppm:
+                        
+                        if int_re_t >= int_re_s:
+                            mz_d.append(mz_t)
+                            int_d.append(int_t)
+                            int_r_d.append(int_re_t)
+                            
+                        elif int_re_t < int_re_s:
+                            mz_d.append(mz_s)
+                            int_d.append(int_s)
+                            int_r_d.append(int_re_s)
+                    else:
                         mz_d.append(mz_t)
                         int_d.append(int_t)
-                    elif int_t < int_s:
-                        mz_d.append(mz_s)
-                        int_d.append(int_s)
-                else:
-                    mz_d.append(mz_t)
-                    int_d.append(int_t)
+                        int_r_d.append(int_re_t)
                     
-            df_d = pd.DataFrame({'mz': mz_d, 'int': int_d})
-            df_d = df_d.drop_duplicates().reset_index().drop(['index'], axis=1)
-            max_int = df_d.iloc[:, 1].idxmax()
-            new_mz.append(round(df_d.iloc[max_int, 0], 4))
-            new_int.append(df_d.iloc[max_int, 1])
-             
-        for mz_s, int_s in zip(signals['mz'], signals['intensity']):
-                        
-            min_mz_ppm = mz_s-((ppm/1000000)*mz_s)
-            max_mz_ppm = (ppm/1000000)*mz_s+mz_s
-
-            c = False
-            for mz_t in table['mz']:
+                df_d = pd.DataFrame({'mz': mz_d, 'int': int_d, 'rela int': int_r_d})
+                df_d = df_d.drop_duplicates().reset_index().drop(['index'], axis=1)
                 
-                if max_mz_ppm >= mz_t >= min_mz_ppm:
-                    c = True
-                    break
+                max_int = df_d.iloc[:, 2].idxmax()
+                new_mz.append(round(df_d.iloc[max_int, 0], 4))
+                new_int.append(df_d.iloc[max_int, 1])
+                new_int_r.append(round(df_d.iloc[max_int, 2], 2))
+             
+            for mz_s, int_s, int_re_s in zip(signals['mz'], signals['intensity'], signals['relative intensity']):
+                
+                min_mz_ppm = mz_s-((ppm/1000000)*mz_s)
+                max_mz_ppm = (ppm/1000000)*mz_s+mz_s
 
-            if not c:
-                new_mz.append(round(mz_s, 4))
-                new_int.append(int_s)            
+                c = False
+                for mz_t in table['mz']:
+                
+                    if max_mz_ppm >= mz_t >= min_mz_ppm:
+                        c = True
+                        break
+
+                if not c:
+                    new_mz.append(round(mz_s, 4))
+                    new_int.append(int_s) 
+                    new_int_r.append(round(int_re_s, 2))
                     
-        table_new = pd.DataFrame({'mz': new_mz, 'int': new_int})
-        table_new = table_new.drop_duplicates()
-        table_new = table_new.sort_values('mz').reset_index().drop(['index'], axis=1)
-        
+            table_new = pd.DataFrame({'mz': new_mz, 'int': new_int, 'rel int': new_int_r})
+            table_new = table_new.drop_duplicates()
+            table_new = table_new.sort_values('mz').reset_index().drop(['index'], axis=1)
+            
+        elif choose == 1:
+            table = pd.DataFrame(table, columns=['mz', 'intensity', 'relative intensity'])
+            table_new = table.append(signals, ignore_index= True)
+            
+            table_new['mz'] = round(table_new['mz'], 4)
+            table_new['relative intensity'] = round(table_new['relative intensity'], 2)
+            table_new = table_new.drop_duplicates(subset=['mz'])
+            table_new = table_new.sort_values('mz').reset_index().drop(['index'], axis=1)
+            
+            
     return table_new
+
+def relat_intensity_calc(table_):
+    """This function calculates the relative intensity of the signals belonging to a sample
+       and add this information as a new column 
+       
+       table_: Dataframe. The result from pd_maldi_match.xml_complete.py
+    """
+    table_final = table_
+    
+    max_int = max(table_final.iloc[:,1])
+    list_ri = []
+
+    for intens in table_final.iloc[:,1]:
+        ir = intens/max_int * 100
+        list_ri.append(ir)
+        
+    table_final['relative intensity'] = list_ri
+    
+    return table_final
 
 # To test the functions
 if __name__ == '__main__':
+    import pd_maldi_match as pdmm
+    
     code = input('Uniprot code of the protein you want to search: ')
-    fill_table(code, test_pdmm, db='Aquasearch_study')
+    test_pdmm = pdmm.xml_complete('test_files/mcE61_Figueres.xml',
+                                  'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
+                                  'test_files/mcE61_PD14_Figueres_Proteins.xlsx')
+    
+    signals = fill_table(code, test_pdmm, db='Aquasearch_study')
+    
     
 
     

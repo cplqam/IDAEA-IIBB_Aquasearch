@@ -1,5 +1,4 @@
 import pandas as pd
-import os
 import pd_table_selection
 import load_archives
 import numpy
@@ -80,7 +79,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=10, ppm=100, unique_=1):
              default ppm = 100
         unique_: integer.
                  unique_ = 1. the non-unique peptides are not included
-                 unique_ = 0,  the non-unique peptides are not included.
+                 unique_ = 0, the non-unique peptides are included.
                  default unique_ = 1
     """
     
@@ -148,16 +147,8 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=10, ppm=100, unique_=1):
     
 
 if __name__ == '__main__':
-    path_ = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Datos_Ester/MALDI_Bruker_Files/MALDI_Bruker/mcE61/mcE61_Figueres/0_F3/1/1SRef/pdata/1'
-    path_2 = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Correo de Montse/Identificaciones'
     
-    afile = 'peaklist.xml'
-    afile2 = 'mcE61_Figueres_01_peptides_2.xlsx'
-    afile3 = 'mcE61_Figueres_01_proteins.xlsx'
-    
-    xml_ = os.path.join(path_, afile)
-    excel = os.path.join(path_2, afile2)
-    prot_ident = os.path.join(path_2, afile3)
-    
-    result = xml_complete(xml_, excel, prot_ident)
+    result = xml_complete('test_files/mcE61_Figueres.xml',
+                          'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
+                          'test_files/mcE61_PD14_Figueres_Proteins.xlsx')
     

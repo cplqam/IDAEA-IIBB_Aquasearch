@@ -1,4 +1,3 @@
-import os
 import pd_table_complete as pdis
 from collections import Counter
 
@@ -101,9 +100,5 @@ def protein_name_simplification(x):
     
     
 if __name__ == '__main__':
-    path_ = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Correo de Montse/Identificaciones'
-
-    excel = 'mcE61_Figueres_01_peptides_2.xlsx'
-    afile = os.path.join(path_, excel) 
     
-    df_sel = organism_selection(afile)
+    df_sel = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx')

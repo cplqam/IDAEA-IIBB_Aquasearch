@@ -1,6 +1,5 @@
 # Choose XML
 
-import os
 import xml.etree.ElementTree as Et
 import pandas as pd
 import numpy
@@ -32,22 +31,13 @@ def parse_xml(path_):
 # To test the function
 if __name__ == '__main__':
     # Pair the data from an XML file
-    carlos = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Datos_Ester/MALDI_Bruker_Files/MALDI_Bruker/mcE61/mcE61_Banyolas/0_G5/1/1SRef/pdata/1'
-    afile = 'peaklist.xml'
-
-    path_ = os.path.join(carlos, afile)
     
-    df, mz_int = parse_xml(path_)
+    df, mz_int = parse_xml('test_files/mcE61_Figueres.xml')
 
 # #######ALSO LET THE OPTION TO DO IT FROM EXCEL#######
 
-# import os
 # import pandas as pd
 # import numpy
-
-# carlos = 'C:/Users/carlos/Desktop/Carlos/Proteomics/Estudio Aquasearch/Prueba/AquaSearch'
-# file = 'spectro_test_centroid_deisotoped.xlsx'
-# path_ = os.path.join(carlos,file)
 
 # def parse_excel(path_):
 #     df = pd.read_excel(path_,header=2)
@@ -60,6 +50,6 @@ if __name__ == '__main__':
 #     return df_2,mz_int
 
 # if __name__ == '__main__':
-#   df,mz_int = parse_excel(path_)
+#   df,mz_int = parse_excel('test_files/mcE61_Figueres.xml')
 
 # #######ALSO LET THE OPTION TO DO IT FROM EXCEL#######
