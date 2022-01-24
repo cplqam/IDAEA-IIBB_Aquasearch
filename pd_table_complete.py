@@ -3,6 +3,7 @@ import os
 import urllib.request as ur
 import sqlite_requests as sr
 import sqlite3
+import time
 
 
 # This function provides a information fom uniprot about a protein
@@ -97,17 +98,23 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
                     protein.remove(p)
                     if len(protein) > 1:
                         prot = ';'.join(protein)
+                except ur.URLError: #If the host brak the conexion: sleep 10 sec and retry
+                    time.sleep(10)
+                    n, o = uniprot_information(p)
+                    df_u = pd.DataFrame({'Accession': [p], 'Protein name': [n], 'Organism': [o]})
+                    l_n = l_n + '|' + str(n)
+                    l_o = l_o + '|' + str(o)
+                    sr.insert_prot_code(db, table, df_u)
 
             else:
                 n = data[0][0]
                 o = data[0][1]
                 l_n = l_n + '|' + str(n)
-                l_o = l_o + '|' + str(o)
-            
+                l_o = l_o + '|' + str(o)   
         if len(prot) >= 1:            
             name[prot] = l_n[1:]
             organ[prot] = l_o[1:]
-
+            
     # Remove any possible exception because the uniprot code is unavailable 
     if len(exception_list) > 0:
         exception_list = list(dict.fromkeys(exception_list))
@@ -130,13 +137,13 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
                         df = df.drop(n-c, axis=0)
                         c += 1        
         
-        name_p = table_complete(df, name)
-        name_o = table_complete(df, organ)
-        df['Protein Name'] = name_p
-        df['Organism Name'] = name_o
+    name_p = table_complete(df, name)
+    name_o = table_complete(df, organ)
+    df['Protein Name'] = name_p
+    df['Organism Name'] = name_o
         
-        df.reset_index(inplace=True, drop=False) 
-        df = df.drop('index', axis=1)
+    df.reset_index(inplace=True, drop=False) 
+    df = df.drop('index', axis=1)
     return df
 
 

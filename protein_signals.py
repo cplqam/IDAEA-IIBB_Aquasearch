@@ -43,17 +43,18 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study'):
             
     signals_inter = maldi_complete.iloc[idx, :]
     signals_inter = signals_inter.reset_index().drop(['index'], axis=1)
-    signals_inter = relat_intensity_calc(signals_inter)
+    if signals_inter.shape[0] > 0:
+        signals_inter = relat_intensity_calc(signals_inter)
     
-    table_comprobation(protein_code)
-    table_examined = table_request(protein_code, signals_inter)
-    sr.eliminate_table('Aquasearch_study', protein_code)
-    sr.create_table_protein(db, protein_code)
-    sr.insert_spectrum(db, table_examined, protein_code)
+        table_comprobation(protein_code)
+        table_examined = table_request(protein_code, signals_inter)
+        sr.eliminate_table('Aquasearch_study', protein_code)
+        sr.create_table_protein(db, protein_code)
+        sr.insert_spectrum(db, table_examined, protein_code)
     
     
     
-def table_request(protein_code, signals, ppm=100, db = 'Aquasearch_study', choose = 0):
+def table_request(protein_code, signals, ppm=100, db = 'Aquasearch_study', choose = 1):
     """This function completes the table belonging to a protein accession code 
        with the new signals in the found in the new sample  
        
@@ -68,6 +69,7 @@ def table_request(protein_code, signals, ppm=100, db = 'Aquasearch_study', choos
                    only the signal with more relative intensity are considered 
        choose = 1: all the signals are introduced in the database  
        """
+    print(signals.shape[0])
     try:
         table = sr.table_download(db, protein_code)
         table_length = len(table)
@@ -163,7 +165,6 @@ def relat_intensity_calc(table_):
        table_: Dataframe. The result from pd_maldi_match.xml_complete.py
     """
     table_final = table_
-    
     max_int = max(table_final.iloc[:,1])
     list_ri = []
 

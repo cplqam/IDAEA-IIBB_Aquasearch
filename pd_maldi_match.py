@@ -33,7 +33,6 @@ def complete_table_proteins(proteins_file, n=10):
     list_final = name_p_o
     df = df.iloc[:, 2:]
     df_final = pd.concat([df_final, df], axis=1)
-    
     return df_final, list_final
 
 
@@ -66,7 +65,7 @@ def maldi_ident_join(dictionary, maldi):
     return df
 
 
-def xml_complete(xml_, ident_pep, ident_prot, n_=10, ppm=100, unique_=1):
+def xml_complete(xml_, ident_pep, ident_prot, n_=10, ppm=100, unique_=0):
     """Assigns the protein and organism name to the MALDI spectrum signals
     
         INPUT
@@ -88,7 +87,6 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=10, ppm=100, unique_=1):
     df_ident, list_ident = complete_table_proteins(ident_prot, n_)
 
     dictionary = {}
-
     for i in range(mz_int.shape[0]):
         mz_xml = mz_int[i, 0]
         list_po = []
@@ -102,9 +100,10 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=10, ppm=100, unique_=1):
                 elif mz_xml <= mz_ident[0] and mz_ident[1] == 'Unique':
                     ppm_calculated = (1 - (mz_xml / mz_ident[0])) * 1000000
     
-                if ppm_calculated <= ppm:
-                    app = identifications.loc[j, 'Protein Name'] + '|' + identifications.loc[j, 'Organism Name'] + '|' + identifications.loc[j, 'Protein Group Accessions']
-                    list_po.append(app)
+                if mz_ident[1] == 'Unique':
+                    if ppm_calculated <= ppm:
+                        app = identifications.loc[j, 'Protein Name'] + '|' + identifications.loc[j, 'Organism Name'] + '|' + identifications.loc[j, 'Protein Group Accessions']
+                        list_po.append(app)
                     
             elif unique_ == 0:
                 if mz_xml > mz_ident[0]:
@@ -151,4 +150,3 @@ if __name__ == '__main__':
     result = xml_complete('test_files/mcE61_Figueres.xml',
                           'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
                           'test_files/mcE61_PD14_Figueres_Proteins.xlsx')
-    
