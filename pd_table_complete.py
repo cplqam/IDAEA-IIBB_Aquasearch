@@ -82,8 +82,11 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
         protein = prot.split(';')
         l_n = ''
         l_o = ''
-            
-        for p in protein:
+        long = len(protein)
+        cont = 0
+        
+        while cont != long :
+            p = protein[cont]
             data = sr.table_request_prot_dict(db, table, p)
             if len(data) == 0:
                 # noinspection PyUnresolvedReferences
@@ -98,6 +101,8 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
                     protein.remove(p)
                     if len(protein) > 1:
                         prot = ';'.join(protein)
+                    cont = cont - 1
+                    long = long-1
                 except ur.URLError: #If the host brak the conexion: sleep 10 sec and retry
                     time.sleep(10)
                     n, o = uniprot_information(p)
@@ -110,7 +115,9 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
                 n = data[0][0]
                 o = data[0][1]
                 l_n = l_n + '|' + str(n)
-                l_o = l_o + '|' + str(o)   
+                l_o = l_o + '|' + str(o) 
+            cont = cont + 1 
+            
         if len(prot) >= 1:            
             name[prot] = l_n[1:]
             organ[prot] = l_o[1:]

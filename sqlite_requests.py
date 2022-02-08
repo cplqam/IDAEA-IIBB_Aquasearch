@@ -82,7 +82,7 @@ def create_table_protein(name, protein_code):
 
     conn = sql.connect(name)
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE " + protein_code + "(mz real, intensity real, relative_intensity real)")
+    cursor.execute("CREATE TABLE " + protein_code + "(mz real, relative_intensity real, uniq text)")
     conn.commit()
     conn.close()
     
@@ -107,9 +107,9 @@ def df_2_list_of_tuples(df):
     out_list = []
     for i in range(df.shape[0]):
         mz = float(df.iloc[i, 0])
-        intensity = int(df.iloc[i, 1])
-        rel_int = float(df.iloc[i, 2])
-        tup = (mz, intensity, rel_int)
+        unique = df.iloc[i, 2]
+        rel_int = float(df.iloc[i, 1])
+        tup = (mz, rel_int, unique)
         out_list.append(tup)
     return out_list
 
@@ -143,5 +143,7 @@ def table_download(name, table_n):
     cur.execute("SELECT * FROM " + table_n)
     datos = cur.fetchall()
     conn.close()
-    return datos
-   
+    return datos   
+    
+    
+    
