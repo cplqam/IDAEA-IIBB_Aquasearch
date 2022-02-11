@@ -137,6 +137,68 @@ def table_request(protein_code, signals, ppm=100, db = 'Aquasearch_study'):
             
     return table_new
 
+
+def table_union(new, old1, old2, signals, db = 'Aquasearch_study'):
+    """This function selects the peptide signals of 2 different proteins in the same group
+       
+       new: string. The name of the new table by the combination of the 2 protein codes
+       old1: string. The name of one protein you want to combine
+       old2: string. The name of the other protein you want to combine
+       signals: Dataframe. The result from pd_maldi_match.xml_complete.py
+       db: string. The name of the database
+    """
+    protein_codes = signals['Protein Accession code']
+    protein_codes = protein_codes.tolist()
+
+    idx = []
+    uni = []
+
+
+    for i in range(len(protein_codes)):
+        signal_code = protein_codes[i]
+        signal_code = signal_code.split(';')
+        num_pep = len(signal_code)
+        counter = 0
+        
+        if old1 in signal_code:
+            counter += 1
+        if old2 in signal_code:
+            counter += 1
+
+        if (counter == num_pep) & (counter >= 1):
+            idx.append(i)
+            uni.append('Unique')
+        elif (counter < num_pep) & (counter >= 1):
+            idx.append(i)
+            uni.append('No unique')
+
+    selected = signals.iloc[idx,[0,1]]
+    rel_intens = relat_intensity_calc(selected)
+
+    rel_intens_rounded = round(rel_intens.iloc[:,2], 2)
+    mz_rounded = round(selected.iloc[:,0],4)
+    signals_interest = pd.DataFrame({'mz': mz_rounded, 'relative intensity': rel_intens_rounded, 'Unique': uni})
+
+    try:
+        table = sr.table_download(db, new)
+        table_length = len(table)
+        table = pd.DataFrame(table, columns=['mz', 'relative intensity', 'Unique'])
+    except sqlite3.OperationalError:
+        table_length = 0
+          
+    if table_length > 0:
+        sr.eliminate_table('Aquasearch_study', new)
+        table_examined = pd.concat([table, signals_interest], axis=0)
+        table_examined = table_examined.drop_duplicates(subset=['mz'])
+        table_examined = table_examined.sort_values('mz').reset_index().drop(['index'], axis = 1)
+        sr.create_table_protein(db, new)
+        sr.insert_spectrum(db, table_examined, new)
+    
+    elif table_length == 0:
+        sr.create_table_protein(db, new)
+        sr.insert_spectrum(db, signals_interest, new)
+    
+
 def relat_intensity_calc(table_):
     """This function calculates the relative intensity of the signals belonging to a sample
        and add this information as a new column 
@@ -165,6 +227,12 @@ if __name__ == '__main__':
                                   'test_files/mcE61_PD14_Figueres_Proteins.xlsx')
     
     fill_table(code, test_pdmm, db='Aquasearch_study')
+    
+    identifications = pdmm.xml_complete('test_files/mcE61_Granollers.xml',
+                              'test_files/mcE61_PD14_Granollers_Peptides.xlsx',
+                              'test_files/mcE61_PD14_Granollers_Proteins.xlsx', n_ = 20, unique_= 1)
+    
+    table_union('Rodent_albumin', 'P00687','P00689', identifications)
     
     
 

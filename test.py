@@ -41,7 +41,15 @@ elif m == '3':
     table = sr.table_download('Aquasearch_study', code)
     table = pd.DataFrame(table, columns=('mz', 'intensity', 'Unique'))
     print(table)
-
+    
+    identifications = pdmm.xml_complete('test_files/mcE61_Granollers.xml',
+                              'test_files/mcE61_PD14_Granollers_Peptides.xlsx',
+                              'test_files/mcE61_PD14_Granollers_Proteins.xlsx', n_ = 20, unique_= 1)
+    
+    ps.table_union('Rodent_albumin', 'P00687','P00689', identifications)
+    table = sr.table_download('Aquasearch_study', 'Rodent_albumin')
+    table = pd.DataFrame(table, columns=('mz', 'intensity', 'Unique'))
+    print(table)
 
 # If you select all modules (t)     
 elif m == 't':
@@ -62,6 +70,15 @@ elif m == 't':
     
     table = sr.table_download('Aquasearch_study', code)
     table = pd.DataFrame(table, columns=('mz', 'intensity'))
+    print(table)
+    
+    identifications = pdmm.xml_complete('test_files/mcE61_Granollers.xml',
+                              'test_files/mcE61_PD14_Granollers_Peptides.xlsx',
+                              'test_files/mcE61_PD14_Granollers_Proteins.xlsx', n_ = 20, unique_= 1)
+    
+    ps.table_union('Rodent_albumin', 'P00687','P00689', identifications)
+    table = sr.table_download('Aquasearch_study', 'Rodent_albumin')
+    table = pd.DataFrame(table, columns=('mz', 'intensity', 'Unique'))
     print(table)
 
 
