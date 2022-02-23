@@ -23,6 +23,7 @@ def complete_table_proteins(proteins_file, n=10):
         INPUT
         proteins_file: string. Path of the file with the identified proteins
         n = integer, Number of proteins selected depending on their representation
+
     """
     
     df_final = pd.read_excel(proteins_file)
@@ -40,32 +41,45 @@ def maldi_ident_join(dictionary, maldi):
     """This function joins the result of maldi and the signal identifications
     
         INPUT    
-        dictionary: a dictionary variable, it contains the mz value and the protein and organism names selected
-        for that mz
-        maldi: an array variable, it contains the maz and intensity from MALDI spectrum"""
-        
-    dic_keys = list(dictionary.keys())
+        dictionary: a dictionary with
+            keys (int):
+                 - mz value
+            values (list):
+                 - the protein names
+                 - species
+                 - accessions
+                 - Unique/No unique
+
+        {1161.503094948756: ['Carcinoembryonic antigen-related cell adhesion;Superoxide dismutase [Cu-Zn]|Homo sapiens ;Gallus gallus |P06731;P80566|No unique;No unique'],
+        1213.601431420398: ['Protein AMBP;Immunoglobulin heavy constant alpha;Immunoglobulin alpha-2 heavy chain|Homo sapiens ;Homo sapiens ;Homo sapiens |P02760;P01876;P0DOX2|No unique;No unique;No unique'],
+       .................................................................................................................
+        2599.235296717235: ['Albumin|Homo sapiens |P02768|Unique'],
+        2990.446067568852: ['Alpha-amylase 1A;Alpha-amylase 2B|Homo sapiens (Human);Homo sapiens |P0DUB6;P19961|No unique;No unique']}
+
+        maldi: an array variable, it contains the maz and intensity from MALDI spectrum
+
+    """
+
     mz_maldi = maldi[:, 0]
 
     size = mz_maldi.shape[0]
     alist = ['-'] * size
 
+    # TODO: Be consistent with column names.
+    #  for example, here: 'Organism', 'Protein Accession code'
+    #  other places: 'Organism Name', 'Accession'
     df = pd.DataFrame({'mz': maldi[:, 0], 'intensity': maldi[:, 1], 'Protein': alist,
                        'Organism': alist, 'Protein Accession code': alist, 'Unique Pep': alist
                        })
 
-    for mz_k in dic_keys:
-        p_o = dictionary[mz_k][0].split('|')
-        prot = p_o[0]
-        org = p_o[1]
-        cod = p_o[2]
-        pep_ = p_o[3]
-    
-        pos = numpy.where( mz_maldi == mz_k)
-        df.loc[pos[0], 'Protein'] = prot
-        df.loc[pos[0], 'Organism'] = org
-        df.loc[pos[0], 'Protein Accession code'] = cod
-        df.loc[pos[0], 'Unique Pep'] = pep_
+    for mz_k, value in dictionary.items():
+        prot, org, cod, pep_ = value[0].split('|')
+
+        pos = numpy.where(mz_maldi == mz_k)[0]
+        df.loc[pos, 'Protein'] = prot
+        df.loc[pos, 'Organism'] = org
+        df.loc[pos, 'Protein Accession code'] = cod
+        df.loc[pos, 'Unique Pep'] = pep_
     return df
 
 
