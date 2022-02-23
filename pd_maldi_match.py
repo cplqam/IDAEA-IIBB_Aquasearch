@@ -2,6 +2,19 @@ import pandas as pd
 import pd_table_selection
 import load_archives
 import numpy
+pd.options.mode.chained_assignment = None
+
+def split_description(x):
+    """Split uniprot protein description in individual items
+
+    description: "Albumin OS=Gallus gallus OX=9031 GN=ALB PE=1 SV=2 - [ALBU_CHICK]"
+    returns items: "Albumin", "Gallus gallus"
+
+    """
+    description = x['Description']
+    items = description.split(' OX')[0]
+    protein, species = items.split(" OS=")
+    return protein, species
 
 
 def complete_table_proteins(proteins_file, n=10):
@@ -12,26 +25,14 @@ def complete_table_proteins(proteins_file, n=10):
         n = integer, Number of proteins selected depending on their representation
     """
     
-    df = pd.read_excel(proteins_file)
-    df = df.head(n)
-    df_description = df.loc[:, 'Description'].tolist()
-    name_o = []
-    name_p = []
-    name_p_o = []
-    
-    for prot in df_description:
-        n_o = prot.split('=')
-        n_o[1] = n_o[1].replace(' OX', '')
-        n_o[0] = n_o[0].replace(' OS', '')
-        n_o_join = n_o[0] + '|' + n_o[1] + ' '
-        
-        name_o.append(n_o[1])
-        name_p.append(n_o[0])
-        name_p_o.append(n_o_join)
-        
-    list_final = pd.DataFrame({'Accession': df.iloc[:, 0], 'Organism Name': name_o, 'Protein Name': name_p})
-    df = df.iloc[:, 2:]
-    df_final = pd.concat([list_final, df], axis=1)
+    df_final = pd.read_excel(proteins_file)
+    df_final = df_final.head(n)
+
+    df_final[['Protein Name', 'Organism Name']] = df_final.apply(split_description, axis=1, result_type='expand')
+    list_final = df_final[['Accession', 'Organism Name', 'Protein Name']]
+
+    # TODO: Both are dataframes. Using 'list' creates confusion. Change return names in function calls
+    #      for example: df_full, df_names
     return df_final, list_final
 
 
@@ -185,11 +186,10 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
 
             if len(list_po) >= 2:
                 positions = []
-                for num in range(len(list_po)):
+                for query in list_po:
                     c = []
-                    query = list_po[num]
                     query = query.split('|')[2]
-                    
+
                     for num2 in range(len(list_ident)):
                         answ = list_ident.iloc[num2, 0]
                         if query == answ:
