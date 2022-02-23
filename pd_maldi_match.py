@@ -102,7 +102,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                 # which are related with the MALDI signal.
                 if mz_xml > mz_ident:
                     ppm_calculated = (1 - (mz_ident / mz_xml)) * 1000000
-                elif mz_xml <= mz_ident:
+                else:
                     ppm_calculated = (1 - (mz_xml / mz_ident)) * 1000000
 
                 if ppm_calculated <= ppm:
@@ -140,8 +140,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                             p_o.append(candidate[1])
                             p_c.append(candidate[2])
                             p_u.append('No unique')
-                 
-                 
+
                 if len(p_n) >= 1: 
                     p_n = ';'.join(p_n)
                     p_o = ';'.join(p_o)
@@ -173,7 +172,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                 mz_ident = identifications.loc[j, 'MH+ [Da]']
                 if mz_xml > mz_ident:
                     ppm_calculated = (1 - (mz_ident / mz_xml)) * 1000000
-                elif mz_xml <= mz_ident:
+                else:
                     ppm_calculated = (1 - (mz_xml / mz_ident)) * 1000000
 
                 if ppm_calculated <= ppm:
