@@ -80,7 +80,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
         ppm: integer. Maximum error allowed for considering a signal from MALDI and Orbitrap  as the same.
              default ppm = 100
         unique_: integer.
-                 unique_ = 1, all the posibilities are considered in non-unique peptides
+                 unique_ = 1, all the possibilities are considered in non-unique peptides
                  unique_ = 0, the non-unique peptides are included.
                  default unique_ = 1
     """
@@ -233,3 +233,23 @@ if __name__ == '__main__':
     result_1 = xml_complete('test_files/mcE61_Figueres.xml',
                             'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
                             'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
+
+    print(result_1)
+
+# C:\Python38\python.exe C:/Python38/programas/aquasearch/pd_maldi_match.py
+#              mz     intensity  ... Protein Accession code           Unique Pep
+# 0    832.300294   9016.435667  ...                      -                    -
+# 1    927.475515   5074.444521  ...                      -                    -
+# 2   1071.546896  10192.549118  ...                      -                    -
+# 3   1161.503095  16112.227734  ...          P06731;P80566  No unique;No unique
+# 4   1181.560038  21171.262371  ...                      -                    -
+# ..          ...           ...  ...                    ...                  ...
+# 64  2634.326469  23260.389467  ...                      -                    -
+# 65  2812.361993  10658.778184  ...                      -                    -
+# 66  2990.446068  17896.442913  ...          P0DUB6;P19961  No unique;No unique
+# 67  3003.349389   6511.268556  ...                      -                    -
+# 68  3016.452827  30834.559000  ...                      -                    -
+#
+# [69 rows x 6 columns]
+#
+# Process finished with exit code 0
