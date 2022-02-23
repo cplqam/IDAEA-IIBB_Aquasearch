@@ -96,16 +96,21 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
             for j in range(identifications.shape[0]):
                 mz_ident = identifications.loc[j, 'MH+ [Da]']
                 
-                #Se meten en una lista todas aquellas señales de Orbitrap con sus identificaciones que se relacionen con la señal de maldi
+                # Put in a list all Orbitrap signals, with their identification,
+                # which are related with the MALDI signal.
                 if mz_xml > mz_ident:
                     ppm_calculated = (1 - (mz_ident / mz_xml)) * 1000000
                 elif mz_xml <= mz_ident:
                     ppm_calculated = (1 - (mz_xml / mz_ident)) * 1000000
 
                 if ppm_calculated <= ppm:
-                    app = identifications.loc[j, 'Protein Name'] + '|' + identifications.loc[j, 'Organism Name'] + '|' + identifications.loc[j, 'Protein Group Accessions']+ '|' + identifications.loc[j, 'Unique Pep']
+                    app = '|'.join([identifications.loc[j, 'Protein Name'],
+                                    identifications.loc[j, 'Organism Name'],
+                                    identifications.loc[j, 'Protein Group Accessions'],
+                                    identifications.loc[j, 'Unique Pep']])
                     app = app.replace(';', '|').split('|')
-                    options = int((len(app)-1)/3) #Last column Unique/No Unique
+
+                    options = int((len(app)-1)/3)    # Last column Unique/No Unique
                     
                     if options == 1:
                         list_po.append('|'.join(app))
@@ -200,8 +205,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                 position = []
                 query = list_po[0]
                 query = query.split('|')[2]
-                
-                
+
                 for num2 in range(len(list_ident)):
                     answ = list_ident.iloc[num2, 0]
                     if query == answ:
@@ -221,5 +225,5 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
 if __name__ == '__main__':
     
     result_1 = xml_complete('test_files/mcE61_Figueres.xml',
-                          'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
-                          'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
+                            'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
+                            'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
