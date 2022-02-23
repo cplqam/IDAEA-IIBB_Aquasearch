@@ -177,10 +177,11 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                     ppm_calculated = (1 - (mz_xml / mz_ident)) * 1000000
 
                 if ppm_calculated <= ppm:
-                    app = identifications.loc[j, 'Protein Name'] + '|' + \
-                          identifications.loc[j, 'Organism Name'] + '|' + \
-                          identifications.loc[j, 'Protein Group Accessions']+ '|' + \
-                          identifications.loc[j, 'Unique Pep']
+                    app = '|'.join([identifications.loc[j, 'Protein Name'],
+                                    identifications.loc[j, 'Organism Name'],
+                                    identifications.loc[j, 'Protein Group Accessions'],
+                                    identifications.loc[j, 'Unique Pep']
+                                    ])
                     list_po.append(app)
 
             if len(list_po) >= 2:
