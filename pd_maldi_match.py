@@ -66,7 +66,7 @@ def maldi_ident_join(dictionary, maldi):
     return df
 
 
-def xml_complete(xml_, ident_pep, ident_prot, n_ = 250, ppm = 100, unique_ = 1):
+def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
     """Assigns the protein and organism name to the MALDI spectrum signals
     
         INPUT
@@ -88,7 +88,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_ = 250, ppm = 100, unique_ = 1):
 
     dictionary = {}
     if unique_ == 1:
-        identifications = pd_table_selection.organism_selection(ident_pep, sel = 2)
+        identifications = pd_table_selection.organism_selection(ident_pep, sel=2)
         
         for i in range(mz_int.shape[0]):
             mz_xml = mz_int[i, 0]
@@ -158,7 +158,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_ = 250, ppm = 100, unique_ = 1):
                         dictionary[mz_xml] = list_po  
                 
     elif unique_ == 0:
-        identifications = pd_table_selection.organism_selection(ident_pep, sel = 1)
+        identifications = pd_table_selection.organism_selection(ident_pep, sel=1)
         for i in range(mz_int.shape[0]):
             mz_xml = mz_int[i, 0]
             list_po = []
@@ -222,4 +222,4 @@ if __name__ == '__main__':
     
     result_1 = xml_complete('test_files/mcE61_Figueres.xml',
                           'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
-                          'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_ = 100, unique_= 1)
+                          'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
