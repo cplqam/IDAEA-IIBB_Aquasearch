@@ -49,7 +49,9 @@ def maldi_ident_join(dictionary, maldi):
     size = mz_maldi.shape[0]
     alist = ['-'] * size
 
-    df = pd.DataFrame({'mz': maldi[:, 0], 'intensity': maldi[:, 1], 'Protein': alist, 'Organism': alist, 'Protein Accession code': alist, 'Unique Pep': alist})
+    df = pd.DataFrame({'mz': maldi[:, 0], 'intensity': maldi[:, 1], 'Protein': alist,
+                       'Organism': alist, 'Protein Accession code': alist, 'Unique Pep': alist
+                       })
 
     for mz_k in dic_keys:
         p_o = dictionary[mz_k][0].split('|')
@@ -175,8 +177,12 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                     ppm_calculated = (1 - (mz_xml / mz_ident)) * 1000000
 
                 if ppm_calculated <= ppm:
-                    app = identifications.loc[j, 'Protein Name'] + '|' + identifications.loc[j, 'Organism Name'] + '|' + identifications.loc[j, 'Protein Group Accessions']+ '|' + identifications.loc[j, 'Unique Pep']
+                    app = identifications.loc[j, 'Protein Name'] + '|' + \
+                          identifications.loc[j, 'Organism Name'] + '|' + \
+                          identifications.loc[j, 'Protein Group Accessions']+ '|' + \
+                          identifications.loc[j, 'Unique Pep']
                     list_po.append(app)
+
             if len(list_po) >= 2:
                 positions = []
                 for num in range(len(list_po)):
