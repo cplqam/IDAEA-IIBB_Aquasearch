@@ -110,7 +110,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                                     identifications.loc[j, 'Unique Pep']])
                     app = app.replace(';', '|').split('|')
 
-                    options = int((len(app)-1)/3)    # Last column Unique/No Unique
+                    options = (len(app)-1) // 3    # Last column Unique/No Unique
                     
                     if options == 1:
                         list_po.append('|'.join(app))
