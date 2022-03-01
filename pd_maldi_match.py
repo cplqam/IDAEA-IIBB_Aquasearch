@@ -128,7 +128,7 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                                     identifications.loc[j, 'Unique Pep']])
                     app = app.split(';')
 
-                    options = (len(app)-1) // 3       #Last column Unique/No Unique
+                    options = (len(app)-1) // 3       # Last column Unique/No Unique
 
                     if options == 1:
                         list_po.append(';'.join(app))
@@ -150,8 +150,8 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                     candidate = list_po[n].split(';')
                     query = candidate[2]
                     for num2 in range(len(list_ident)):
-                        answ = list_ident.iloc[num2, 0]
-                        if query == answ:
+                        answer = list_ident.iloc[num2, 0]
+                        if query == answer:
                             p_n.append(candidate[0])
                             p_o.append(candidate[1])
                             p_c.append(candidate[2])
@@ -172,9 +172,9 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                 candidate = list_po[0].split(';')
                 query = candidate[2]
                 for num2 in range(len(list_ident)):
-                    answ = list_ident.iloc[num2, 0]
+                    answer = list_ident.iloc[num2, 0]
 
-                    if query == answ:
+                    if query == answer:
                         list_po = [candidate[0], candidate[1], candidate[2], candidate[3]]
                         list_po = ['|'.join(list_po)]
                         dictionary[mz_xml] = list_po
@@ -205,8 +205,8 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                     query = query.split(';')[2]
 
                     for num2 in range(len(list_ident)):
-                        answ = list_ident.iloc[num2, 0]
-                        if query == answ:
+                        answer = list_ident.iloc[num2, 0]
+                        if query == answer:
                             c.append(list(list_ident.iloc[:, 0]).index(query))
 
                     if len(c) == 0:
@@ -227,8 +227,8 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                 query = query.split(';')[2]
 
                 for num2 in range(len(list_ident)):
-                    answ = list_ident.iloc[num2, 0]
-                    if query == answ:
+                    answer = list_ident.iloc[num2, 0]
+                    if query == answer:
                         position.append(list(list_ident.iloc[:, 0]).index(query))
 
                 if len(position) == 0:
@@ -238,8 +238,6 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                     dictionary[mz_xml] = list_po
 
     result = maldi_ident_join(dictionary, mz_int)
-
-
     return result
 
 
