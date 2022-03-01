@@ -143,7 +143,22 @@ def table_download(name, table_n):
     cur.execute("SELECT * FROM " + table_n)
     datos = cur.fetchall()
     conn.close()
-    return datos   
+    return datos 
+
+# To get the name of the tables in the database
+def get_table_names(db):
+    con = sql.connect(db)
+    cursor = con.cursor()
+
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    data = cursor.fetchall()
+
+    out = [];
+    for c in data:
+        out.append(c[0])
+
+    out.remove('protein_dictionary')
+    return out
     
     
     

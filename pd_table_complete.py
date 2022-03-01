@@ -93,8 +93,8 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
                 try:
                     n, o = uniprot_information(p)
                     df_u = pd.DataFrame({'Accession': [p], 'Protein name': [n], 'Organism': [o]})
-                    l_n = l_n + '|' + str(n)
-                    l_o = l_o + '|' + str(o)
+                    l_n = l_n + ';' + str(n)
+                    l_o = l_o + ';' + str(o)
                     sr.insert_prot_code(db, table, df_u)
                 except ur.HTTPError:
                     exception_list.append(p)
@@ -107,15 +107,15 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
                     time.sleep(10)
                     n, o = uniprot_information(p)
                     df_u = pd.DataFrame({'Accession': [p], 'Protein name': [n], 'Organism': [o]})
-                    l_n = l_n + '|' + str(n)
-                    l_o = l_o + '|' + str(o)
+                    l_n = l_n + ';' + str(n)
+                    l_o = l_o + ';' + str(o)
                     sr.insert_prot_code(db, table, df_u)
 
             else:
                 n = data[0][0]
                 o = data[0][1]
-                l_n = l_n + '|' + str(n)
-                l_o = l_o + '|' + str(o) 
+                l_n = l_n + ';' + str(n)
+                l_o = l_o + ';' + str(o) 
             cont = cont + 1 
             
         if len(prot) >= 1:            

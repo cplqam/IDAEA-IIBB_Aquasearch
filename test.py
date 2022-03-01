@@ -4,10 +4,11 @@ import pd_table_complete as pdis
 import pd_maldi_match as pdmm
 import protein_signals as ps
 import sqlite_requests as sr
+import score_matchms as sm
 import pandas as pd
 
 
-m = input('Which module do you want to test? (1,2,3,t or eg): ')
+m = input('Which module do you want to test? (1,2,3,4,t or eg): ')
 
 # If you select the module 1 (1) 
 if m == '1':
@@ -51,6 +52,10 @@ elif m == '3':
     table = pd.DataFrame(table, columns=('mz', 'intensity', 'Unique'))
     print(table)
 
+# If you select the module 4 (4)
+elif m == '4':
+    res, res2 = sm.request_scores('test_files/mcE61_Mataro.xml', tolerance = 0.05, shift =  0,
+                               mz_power = 0,intensity_power = 1.0, dat_b='Aquasearch_study')
 # If you select all modules (t)     
 elif m == 't':
 
@@ -80,6 +85,8 @@ elif m == 't':
     table = sr.table_download('Aquasearch_study', 'Rodent_albumin')
     table = pd.DataFrame(table, columns=('mz', 'intensity', 'Unique'))
     print(table)
+    res, res2 = sm.request_scores('test_files/mcE61_Figueres.xml', tolerance = 0.05, shift =  0,
+                               mz_power = 0,intensity_power = 1.0, dat_b='Aquasearch_study')
 
 
 # If you select a complete example with the protein P19121 (chicken albumin) from 3 season in 1 WWTP (eg)
@@ -103,3 +110,10 @@ elif m == 'eg':
     table = sr.table_download('Aquasearch_study', code)
     table = pd.DataFrame(table, columns=('mz', 'intensity', 'relative intensity'))
     print(table)
+    
+    res, res2 = sm.request_scores('test_files/mcE61_Figueres.xml', tolerance = 0.05, shift =  0,
+                               mz_power = 0,intensity_power = 1.0, dat_b='Aquasearch_study')
+    resb, res2b = sm.request_scores('test_files/mcE67_Figueres.xml', tolerance = 0.05, shift =  0,
+                               mz_power = 0,intensity_power = 1.0, dat_b='Aquasearch_study')
+    resc, res2c = sm.request_scores('test_files/mcE72_Figueres.xml', tolerance = 0.05, shift =  0,
+                               mz_power = 0,intensity_power = 1.0, dat_b='Aquasearch_study')
