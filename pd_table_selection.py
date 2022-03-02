@@ -126,7 +126,6 @@ def protein_name_simplification(x):
 
 
 if __name__ == '__main__':
-    # TODO: This file has no entry with unique protein.
     df_sel_2 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel=2)
     print(df_sel_2)
     
