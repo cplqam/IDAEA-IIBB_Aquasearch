@@ -197,6 +197,20 @@ def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0,
 
 def request_scores(request_xml, tolerance: float, shift: float = 0,
                    mz_power: float = 0.0, intensity_power: float = 1.0, dat_b='Aquasearch_study'):
+    """This function has provides a comparation and scoring of the request MALD-TOF spectrum 
+       versus each protein of the database
+       
+       >>> r, r2 = request_scores('test_files/mcE61_Figueres.xml', tolerance = 0.05, shift =  0, mz_power = 0,intensity_power = 1.0, dat_b='Aquasearch_study')
+       >>> len(r) == len(r2)
+       True
+       
+       >>> len(r) == len(sr.get_table_names('Aquasearch_study'))
+       True
+       
+       INPUT
+       request_xml: xml file. The path of the xml file of interest
+       
+    """
 
     request = load_archives.parse_xml(request_xml)
     list_tables_db = sr.get_table_names(dat_b)
@@ -204,7 +218,6 @@ def request_scores(request_xml, tolerance: float, shift: float = 0,
     scores = {}
     scores_unique = {}
     for protein in list_tables_db:
-        print(protein)
         mz_intens, u_inf = load_archives.db_table_request(protein)
         matches = collect_peak_pairs(request[1], mz_intens, u_inf, tolerance, shift, mz_power,
                                      intensity_power)
@@ -222,6 +235,8 @@ def request_scores(request_xml, tolerance: float, shift: float = 0,
 if __name__ == '__main__':
 
     import pandas as pd
+    import doctest
+    doctest.testmod()
 
     table = sr.table_download('Aquasearch_study', 'P19121')
     table = pd.DataFrame(table, columns=('mz', 'intensity', 'Unique'))

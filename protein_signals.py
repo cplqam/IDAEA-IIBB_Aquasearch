@@ -225,15 +225,9 @@ def relat_intensity_calc(table_):
 if __name__ == '__main__':
     import pd_maldi_match as pdmm
 
-    code = input('Uniprot code of the protein you want to search: ')
+    code = 'P19121'
     test_pdmm = pdmm.xml_complete('test_files/mcE61_Figueres.xml',
                                   'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
                                   'test_files/mcE61_PD14_Figueres_Proteins.xlsx')
 
     fill_table(code, test_pdmm, db='Aquasearch_study')
-
-    identifications = pdmm.xml_complete('test_files/mcE61_Granollers.xml',
-                              'test_files/mcE61_PD14_Granollers_Peptides.xlsx',
-                              'test_files/mcE61_PD14_Granollers_Proteins.xlsx', n_ = 20, unique_= 1)
-
-    table_union('Rodent_albumin', 'P00687','P00689', identifications)

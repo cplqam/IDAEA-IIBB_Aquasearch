@@ -5,6 +5,16 @@ import sqlite_requests as sr
 
 # To import the tables from database
 def db_table_request(x):
+    """This function import a table from a SQLite dataset
+        
+        >>> tab,uniq = db_table_request('P19121')
+        >>> tab.shape[0] == len(uniq)
+        True
+        
+        >>> tab.shape[1] == 2
+        True
+    
+    """
     table = sr.table_download('Aquasearch_study', x)
     table = pd.DataFrame(table, columns=('mz', 'intensity', 'Unique'))
     
@@ -23,6 +33,13 @@ def db_table_request(x):
 
 # To import new requests
 def parse_xml(path_):
+    """This function import a table from a SQLite dataset
+        
+        >>> df_, mzint = parse_xml('test_files/mcE61_Figueres.xml')
+        >>> df_.shape == mzint.shape
+        True
+    
+    """
     # Select mz and intensity columns, could take more if needed
     df_cols = ["mass", "intensity"]
     rows = []
@@ -48,7 +65,11 @@ def parse_xml(path_):
 
 # To test the function
 if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+    
     # Pair the data from an XML file
+    
 
     df, mz_int = parse_xml('test_files/mcE61_Figueres.xml')
     table,unique_inf = db_table_request('P19121')

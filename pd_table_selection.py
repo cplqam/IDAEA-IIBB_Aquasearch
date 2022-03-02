@@ -5,6 +5,16 @@ def organism_selection(path__, sel = 1):
     """This function completes the peptide output from Proteime Discoverer with the protein and
         organism they belong to, and it selects 1 option among the options of the
         non-unique peptides
+        
+        >>> df_sel_2 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel = 2)
+        >>> df_sel_2.shape
+        (1152, 19)
+        
+        >>> df_sel_2.loc[11, 'Protein Name']
+    	'Alpha-amylase 1A;Alpha-amylase 2B;Pancreatic alpha-amylase'
+        
+        >>> df_sel_2.loc[11, 'Unique Pep']
+        'No unique'
 
         INPUT
         path__: string. The path of the peptide output from Proteome Discoverer
@@ -137,5 +147,7 @@ def protein_name_simplification(x, uni = 0):
 
 if __name__ == '__main__':
 
-    df_sel_2 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel = 2)
+    import doctest
+    doctest.testmod()
     
+    df_sel = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel = 2)

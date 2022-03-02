@@ -55,6 +55,16 @@ def table_complete(df, dic_):
 def protein_information(path__, db='Aquasearch_study', table='protein_dictionary'):
     """Completes the table result of Proteome Discoverer search with information about proteins (protein name
     and organism) with a Uniprot request.
+    
+        >>> df = protein_information('test_files/mcE61_PD14_Figueres_Peptides.xlsx')
+        >>> df.shape
+        (1152, 18)
+    
+        >>> df.loc[11, 'Protein Name']
+        'Alpha-amylase 1A;Alpha-amylase 2B;Pancreatic alpha-amylase'
+        
+        >>> df.loc[23, 'Organism Name']
+        'Homo sapiens ;Homo sapiens '
 
     INPUT:
         path__: string. The path of the peptide output from Proteome Discoverer
@@ -156,5 +166,8 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
 
 # To test the functions
 if __name__ == '__main__':
+    
+    import doctest
+    doctest.testmod()
     
     final = protein_information('test_files/mcE61_PD14_Figueres_Peptides.xlsx')

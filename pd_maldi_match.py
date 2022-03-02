@@ -86,6 +86,19 @@ def maldi_ident_join(dictionary, maldi):
 
 def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
     """Assigns the protein and organism name to the MALDI spectrum signals
+    
+       >>> result = xml_complete('test_files/mcE61_Figueres.xml', 'test_files/mcE61_PD14_Figueres_Peptides.xlsx', 'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
+       >>> result.shape
+       (69, 6)
+       
+       >>> result.iloc[3,:]
+       mz                                                              1161.503095
+       intensity                                                      16112.227734
+       Protein                   Carcinoembryonic antigen-related cell adhesion...
+       Organism                                       Homo sapiens ;Gallus gallus 
+       Protein Accession code                                        P06731;P80566
+       Unique Pep                                              No unique;No unique
+       Name: 3, dtype: object
 
         INPUT
         xml_: string. Path of the MALDI xml format file
@@ -244,12 +257,14 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
 
 
 if __name__ == '__main__':
-
+    
+    import doctest
+    doctest.testmod()
+    
     result_1 = xml_complete('test_files/mcE61_Figueres.xml',
                             'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
                             'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
-
-    print(result_1)
+    
 
 # C:\Python38\python.exe C:/Python38/programas/aquasearch/pd_maldi_match.py
 #              mz     intensity  ... Protein Accession code           Unique Pep
