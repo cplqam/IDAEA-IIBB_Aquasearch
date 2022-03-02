@@ -86,16 +86,16 @@ def maldi_ident_join(dictionary, maldi):
 
 def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
     """Assigns the protein and organism name to the MALDI spectrum signals
-    
+
        >>> result = xml_complete('test_files/mcE61_Figueres.xml', 'test_files/mcE61_PD14_Figueres_Peptides.xlsx', 'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
        >>> result.shape
        (69, 6)
-       
+
        >>> result.iloc[3,:]
        mz                                                              1161.503095
        intensity                                                      16112.227734
        Protein                   Carcinoembryonic antigen-related cell adhesion...
-       Organism                                       Homo sapiens ;Gallus gallus 
+       Organism                                       Homo sapiens ;Gallus gallus
        Protein Accession code                                        P06731;P80566
        Unique Pep                                              No unique;No unique
        Name: 3, dtype: object
@@ -113,36 +113,28 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                  unique_ = 0, the non-unique peptides are included.
                  default unique_ = 1
     """
-
+    target_columns = ['Protein Name', 'Organism Name', 'Protein Group Accessions', 'Unique Pep']
     df, mz_int = load_archives.parse_xml(xml_)
     df_ident, list_ident = complete_table_proteins(ident_prot, n_)
 
     dictionary = {}
     if unique_ == 1:
         identifications = pd_table_selection.organism_selection(ident_pep, sel=2)
-
-        for i in range(mz_int.shape[0]):
-            mz_xml = mz_int[i, 0]
+        for ion in mz_int:
+            mz_xml = ion[0]
+            delta_mz = ppm * mz_xml / 1E6
             list_po = []
-            for j in range(identifications.shape[0]):
-                mz_ident = identifications.loc[j, 'MH+ [Da]']
-
+            # TODO: itertuples is faster but needs column names being valid python identifiers
+            #       Should replace this with a vectorized method.
+            for idx, row in identifications.iterrows():
                 # Put in a list all Orbitrap signals, with their identification,
                 # which are related with the MALDI signal.
-                if mz_xml > mz_ident:
-                    ppm_calculated = (1 - (mz_ident / mz_xml)) * 1000000
-                else:
-                    ppm_calculated = (1 - (mz_xml / mz_ident)) * 1000000
-
-                if ppm_calculated <= ppm:
-                    app = ';'.join([identifications.loc[j, 'Protein Name'],
-                                    identifications.loc[j, 'Organism Name'],
-                                    identifications.loc[j, 'Protein Group Accessions'],
-                                    identifications.loc[j, 'Unique Pep']])
+                mz_ident = row['MH+ [Da]']
+                if abs(mz_ident - mz_xml) <= delta_mz:
+                    app = ';'.join([row[value] for value in target_columns])
                     app = app.split(';')
 
-                    options = (len(app)-1) // 3       #Last column Unique/No Unique
-
+                    options = (len(app)-1) // 3       # Last column Unique/No Unique
                     if options == 1:
                         list_po.append(';'.join(app))
                     elif options >= 2:
@@ -159,12 +151,12 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                 p_c = []
                 p_u = []
 
-                for n in range(len(list_po)):
-                    candidate = list_po[n].split(';')
+                for po in list_po:
+                    candidate = po.split(';')
                     query = candidate[2]
                     for num2 in range(len(list_ident)):
-                        answ = list_ident.iloc[num2, 0]
-                        if query == answ:
+                        answer = list_ident.iloc[num2, 0]
+                        if query == answer:
                             p_n.append(candidate[0])
                             p_o.append(candidate[1])
                             p_c.append(candidate[2])
@@ -185,9 +177,9 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                 candidate = list_po[0].split(';')
                 query = candidate[2]
                 for num2 in range(len(list_ident)):
-                    answ = list_ident.iloc[num2, 0]
+                    answer = list_ident.iloc[num2, 0]
 
-                    if query == answ:
+                    if query == answer:
                         list_po = [candidate[0], candidate[1], candidate[2], candidate[3]]
                         list_po = ['|'.join(list_po)]
                         dictionary[mz_xml] = list_po
@@ -218,8 +210,8 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                     query = query.split(';')[2]
 
                     for num2 in range(len(list_ident)):
-                        answ = list_ident.iloc[num2, 0]
-                        if query == answ:
+                        answer = list_ident.iloc[num2, 0]
+                        if query == answer:
                             c.append(list(list_ident.iloc[:, 0]).index(query))
 
                     if len(c) == 0:
@@ -240,31 +232,39 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                 query = query.split(';')[2]
 
                 for num2 in range(len(list_ident)):
-                    answ = list_ident.iloc[num2, 0]
-                    if query == answ:
+                    answer = list_ident.iloc[num2, 0]
+                    if query == answer:
                         position.append(list(list_ident.iloc[:, 0]).index(query))
 
                 if len(position) == 0:
-                    position.append(n_+1)
+                    position.append(n_ + 1)
 
                 if position[0] < n_ + 1:
                     dictionary[mz_xml] = list_po
 
+    # TODO: This table shows non consistent names in column 'Organism'
     result = maldi_ident_join(dictionary, mz_int)
-
-
     return result
+
+def console_wide_view():
+    desired_width = 320
+    pd.set_option('display.width', desired_width)
+    # np.set_printoptions(linewidth=desired_width)
+    pd.set_option('display.max_columns', 10)
 
 
 if __name__ == '__main__':
-    
+
     import doctest
     doctest.testmod()
-    
+
+
+
+    console_wide_view()
     result_1 = xml_complete('test_files/mcE61_Figueres.xml',
                             'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
                             'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
-    
+
 
 # C:\Python38\python.exe C:/Python38/programas/aquasearch/pd_maldi_match.py
 #              mz     intensity  ... Protein Accession code           Unique Pep

@@ -1,18 +1,18 @@
 from collections import Counter
 import pd_table_complete as pdis
 
-def organism_selection(path__, sel = 1):
-    """This function completes the peptide output from Proteime Discoverer with the protein and
+def organism_selection(path__, sel=1):
+    """Completes the peptide output from Proteome Discoverer with the protein and
         organism they belong to, and it selects 1 option among the options of the
         non-unique peptides
-        
+
         >>> df_sel_2 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel = 2)
         >>> df_sel_2.shape
         (1152, 19)
-        
+
         >>> df_sel_2.loc[11, 'Protein Name']
     	'Alpha-amylase 1A;Alpha-amylase 2B;Pancreatic alpha-amylase'
-        
+
         >>> df_sel_2.loc[11, 'Unique Pep']
         'No unique'
 
@@ -21,63 +21,54 @@ def organism_selection(path__, sel = 1):
         sel = integer
             sel = 1: a selection based on the representation of each specie is performed for
                      non-unique peptides
-            sel = 2: all the possibilities are considered for non-unique peptides"""
+            sel = 2: all the possibilities are considered for non-unique peptides
+    """
 
     df = pdis.protein_information(path__)
 
     if sel == 2:
-        uniq = []
-        for code_ in df.loc[:,'Protein Group Accessions']:
-            code_ = code_.split(';')
-
-            if len(code_) == 1:
-                uniq.append('Unique')
+        uniques = []
+        for accessions in df['Protein Group Accessions']:
+            if ';' in accessions:
+                uniques.append('No unique')
             else:
-                uniq.append('No unique')
-        df.loc[:, 'Unique Pep'] = uniq
-
-        for i in range(df.shape[0]):
-            df.loc[i,'Protein Name'] = protein_name_simplification(df.loc[i,'Protein Name'],
-                                                                   uni = 1) #uni has to be 1
+                uniques.append('Unique')
+        df.loc[:, 'Unique Pep'] = uniques
 
     else:
         all_species = []
-        species = list(df['Organism Name'])
-        for item in species:
-            if ';' in item:
-                names = item.split(';')
-                all_species.extend(names)
-            else:
-                all_species.append(item)
+        for species in df['Organism Name']:
+            names = species.split(';')
+            all_species.extend(names)
 
         species_count = Counter(all_species)
         most_common = species_count.most_common()
-        frec_organism = dict(most_common)
+        freq_organism = dict(most_common)
 
-        protein_selected, accession_selected, organism_selected, uniq = most_abundant_entry_selection(df, frec_organism)
+        # TODO: Vectorize all this
+        protein_selected, accession_selected, organism_selected, uniques = most_abundant_entry_selection(df, freq_organism)
 
         df.loc[:, 'Protein Group Accessions'] = accession_selected
         df.loc[:, 'Protein Name'] = protein_selected
         df.loc[:, 'Organism Name'] = organism_selected
-        df.loc[:, 'Unique Pep'] = uniq
+        df.loc[:, 'Unique Pep'] = uniques
 
-        df['Protein Name'] = df.apply(protein_name_simplification, axis = 1) # uni has to be 0
-
+    df['Protein Name'] = df.apply(protein_name_simplification, axis=1)
     return df
 
-def most_abundant_entry_selection(x, frec_organism):
-    """This function selects the peptide chosen among all non-unique options depending on
-        the representation of the organism the peptide belong to
+def most_abundant_entry_selection(x, freq_organism):
+    """Selects a peptide-inferred protein among all non-unique options based on organism prevalence.
+
         INPUT
-        x: the data frame result from "pd_table_complete.protein_information.py" with
-           the protein options for the peptides
-        frec_organism: the sorted list of the organisms depending on their representation
+        x: DataFrame returned by "pd_table_complete.protein_information.py" with
+           the protein options for each identified peptide.
+        freq_organism: list of organisms sorted by representation
         """
 
     final_n = []
     final_p = []
     final = []
-    uni = []
+    unique = []
 
     for n in range(len(x)):
         query = x.loc[n, 'Protein Name']
@@ -88,7 +79,7 @@ def most_abundant_entry_selection(x, frec_organism):
             final.append(query)
             final_p.append(prot)
             final_n.append(nam)
-            uni.append("Unique")
+            unique.append("Unique")
 
         else:
             n = nam.split(';')
@@ -96,8 +87,8 @@ def most_abundant_entry_selection(x, frec_organism):
             species_a = prot.split(';')
             reps = []
 
-            for name,name_a,name_n in zip(species,species_a,n):
-                reps.append((frec_organism[name_n], name, name_a, name_n))
+            for name, name_a, name_n in zip(species, species_a, n):
+                reps.append((freq_organism[name_n], name, name_a, name_n))
             reps.sort(reverse=True)
 
             higher = 0
@@ -107,7 +98,7 @@ def most_abundant_entry_selection(x, frec_organism):
             for rep, item, rep_a, rep_n in reps:
                 if rep >= higher:
                     higher = rep       # assign the first entry (the higher in the list) to 'higher'
-                    prob.append(item)  # store all entries with the same frecuency
+                    prob.append(item)  # store all entries with the same frequency
                     prob_a.append(rep_a)
                     prob_n.append(rep_n)
                 else:
@@ -119,35 +110,37 @@ def most_abundant_entry_selection(x, frec_organism):
             final.append(prob[0])
             prob_n = list(set(prob_n))
             final_n.append(prob_n[0])
-            uni.append('No unique')
+            unique.append('No unique')
 
-    return final, final_p, final_n, uni
+    return final, final_p, final_n, unique
 
-def protein_name_simplification(x, uni = 0):
-    """This function perform a protein name simplification
+def protein_name_simplification(x):
+    """Simplifies protein name (takes only 4 first words max).
 
         INPUT
         x: a dataframe variable, completed and non-unique peptide selected dataframe output
-           from Proteime Discoverer
-        uni: integer
-            uni = 0: when 1 protein name is reported for echa signal
-            uni = 1: when more than 1 protein name is reported for echa signal"""
-    if uni == 0:
-        name = x['Protein Name']
-        atoms = name.split()[:4]
-        return ' '.join(atoms)
+           from Proteome Discoverer
 
-    elif uni == 1:
-        atoms = x.split(';')
-        list_ = []
-        for prot in atoms:
-            prot = prot.split()[:4]
-            list_.append(' '.join(prot))
-        return ';'.join(list_)
+    """
+
+    proteins = x['Protein Name'].split(';')
+    names = []
+    for protein in proteins:
+        words = protein.split()[:4]
+        names.append(' '.join(words))
+    return ';'.join(names)
+
 
 if __name__ == '__main__':
 
     import doctest
     doctest.testmod()
-    
-    df_sel = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel = 2)
+
+    df_sel_1 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel=1)
+    df_sel_2 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel=2)
+
+    print('-----sel 1----------')
+    print(df_sel_1)
+    print()
+    print('-----sel 2----------')
+    print(df_sel_2)
