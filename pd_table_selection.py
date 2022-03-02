@@ -28,7 +28,7 @@ def organism_selection(path__, sel=1):
 
         for i in range(df.shape[0]):
             df.loc[i, 'Protein Name'] = protein_name_simplification(df.loc[i, 'Protein Name'],
-                                                                   uni=1) #uni has to be 1
+                                                                    uni=1)   # uni has to be 1
 
     else:
         all_species = []
@@ -51,7 +51,7 @@ def organism_selection(path__, sel=1):
         df.loc[:, 'Organism Name'] = organism_selected
         df.loc[:, 'Unique Pep'] = uniq
 
-        df['Protein Name'] = df.apply(protein_name_simplification, axis=1) # uni has to be 0
+        df['Protein Name'] = df.apply(protein_name_simplification, axis=1)   # uni has to be 0
 
     return df
 
@@ -134,6 +134,7 @@ def protein_name_simplification(x, uni=0):
             prot = prot.split()[:4]
             list_.append(' '.join(prot))
         return ';'.join(list_)
+
 
 if __name__ == '__main__':
 
