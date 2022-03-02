@@ -2,7 +2,7 @@ from collections import Counter
 import pd_table_complete as pdis
 
 def organism_selection(path__, sel=1):
-    """This function completes the peptide output from Proteime Discoverer with the protein and
+    """This function completes the peptide output from Proteome Discoverer with the protein and
         organism they belong to, and it selects 1 option among the options of the
         non-unique peptides
 
@@ -42,9 +42,9 @@ def organism_selection(path__, sel=1):
 
         species_count = Counter(all_species)
         most_common = species_count.most_common()
-        frec_organism = dict(most_common)
+        freq_organism = dict(most_common)
 
-        protein_selected, accession_selected, organism_selected, uniq = most_abundant_entry_selection(df, frec_organism)
+        protein_selected, accession_selected, organism_selected, uniq = most_abundant_entry_selection(df, freq_organism)
 
         df.loc[:, 'Protein Group Accessions'] = accession_selected
         df.loc[:, 'Protein Name'] = protein_selected
@@ -55,13 +55,13 @@ def organism_selection(path__, sel=1):
 
     return df
 
-def most_abundant_entry_selection(x, frec_organism):
+def most_abundant_entry_selection(x, freq_organism):
     """This function selects the peptide chosen among all non-unique options depending on
         the representation of the organism the peptide belong to
         INPUT
         x: the data frame result from "pd_table_complete.protein_information.py" with
            the protein options for the peptides
-        frec_organism: the sorted list of the organisms depending on their representation
+        freq_organism: the sorted list of the organisms depending on their representation
         """
 
     final_n = []
@@ -87,7 +87,7 @@ def most_abundant_entry_selection(x, frec_organism):
             reps = []
 
             for name, name_a, name_n in zip(species, species_a, n):
-                reps.append((frec_organism[name_n], name, name_a, name_n))
+                reps.append((freq_organism[name_n], name, name_a, name_n))
             reps.sort(reverse=True)
 
             higher = 0
@@ -97,7 +97,7 @@ def most_abundant_entry_selection(x, frec_organism):
             for rep, item, rep_a, rep_n in reps:
                 if rep >= higher:
                     higher = rep       # assign the first entry (the higher in the list) to 'higher'
-                    prob.append(item)  # store all entries with the same frecuency
+                    prob.append(item)  # store all entries with the same frequency
                     prob_a.append(rep_a)
                     prob_n.append(rep_n)
                 else:
@@ -118,10 +118,10 @@ def protein_name_simplification(x, uni=0):
 
         INPUT
         x: a dataframe variable, completed and non-unique peptide selected dataframe output
-           from Proteime Discoverer
+           from Proteome Discoverer
         uni: integer
-            uni = 0: when 1 protein name is reported for echa signal
-            uni = 1: when more than 1 protein name is reported for echa signal"""
+            uni = 0: when 1 protein name is reported for each signal
+            uni = 1: when more than 1 protein name is reported for each signal"""
     if uni == 0:
         name = x['Protein Name']
         atoms = name.split()[:4]
