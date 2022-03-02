@@ -39,6 +39,7 @@ def organism_selection(path__, sel=1):
         most_common = species_count.most_common()
         freq_organism = dict(most_common)
 
+        # TODO: Vectorize all this
         protein_selected, accession_selected, organism_selected, uniq = most_abundant_entry_selection(df, freq_organism)
 
         df.loc[:, 'Protein Group Accessions'] = accession_selected
@@ -47,11 +48,10 @@ def organism_selection(path__, sel=1):
         df.loc[:, 'Unique Pep'] = uniq
 
     df['Protein Name'] = df.apply(protein_name_simplification, axis=1)
-
     return df
 
 def most_abundant_entry_selection(x, freq_organism):
-    """Selects a peptide-inferred protein among all non-unique options depending on organism prevalence.
+    """Selects a peptide-inferred protein among all non-unique options based on organism prevalence.
 
         INPUT
         x: DataFrame returned by "pd_table_complete.protein_information.py" with
@@ -62,7 +62,7 @@ def most_abundant_entry_selection(x, freq_organism):
     final_n = []
     final_p = []
     final = []
-    uni = []
+    unique = []
 
     for n in range(len(x)):
         query = x.loc[n, 'Protein Name']
@@ -73,7 +73,7 @@ def most_abundant_entry_selection(x, freq_organism):
             final.append(query)
             final_p.append(prot)
             final_n.append(nam)
-            uni.append("Unique")
+            unique.append("Unique")
 
         else:
             n = nam.split(';')
@@ -104,9 +104,9 @@ def most_abundant_entry_selection(x, freq_organism):
             final.append(prob[0])
             prob_n = list(set(prob_n))
             final_n.append(prob_n[0])
-            uni.append('No unique')
+            unique.append('No unique')
 
-    return final, final_p, final_n, uni
+    return final, final_p, final_n, unique
 
 def protein_name_simplification(x):
     """Simplifies protein name (takes only 4 first words max).
@@ -126,6 +126,11 @@ def protein_name_simplification(x):
 
 
 if __name__ == '__main__':
+    df_sel_1 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel=1)
     df_sel_2 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel=2)
+
+    print('-----sel 1----------')
+    print(df_sel_1)
+    print()
+    print('-----sel 2----------')
     print(df_sel_2)
-    
