@@ -2,7 +2,7 @@ from collections import Counter
 import pd_table_complete as pdis
 
 def organism_selection(path__, sel=1):
-    """This function completes the peptide output from Proteome Discoverer with the protein and
+    """Completes the peptide output from Proteome Discoverer with the protein and
         organism they belong to, and it selects 1 option among the options of the
         non-unique peptides
 
@@ -11,24 +11,19 @@ def organism_selection(path__, sel=1):
         sel = integer
             sel = 1: a selection based on the representation of each specie is performed for
                      non-unique peptides
-            sel = 2: all the possibilities are considered for non-unique peptides"""
+            sel = 2: all the possibilities are considered for non-unique peptides
+    """
 
     df = pdis.protein_information(path__)
 
     if sel == 2:
         uniq = []
         for code_ in df.loc[:, 'Protein Group Accessions']:
-            code_ = code_.split(';')
-
-            if len(code_) == 1:
-                uniq.append('Unique')
-            else:
+            if ';' in code_:
                 uniq.append('No unique')
+            else:
+                uniq.append('Unique')
         df.loc[:, 'Unique Pep'] = uniq
-
-        for i in range(df.shape[0]):
-            df.loc[i, 'Protein Name'] = protein_name_simplification(df.loc[i, 'Protein Name'],
-                                                                    uni=1)   # uni has to be 1
 
     else:
         all_species = []
@@ -51,17 +46,17 @@ def organism_selection(path__, sel=1):
         df.loc[:, 'Organism Name'] = organism_selected
         df.loc[:, 'Unique Pep'] = uniq
 
-        df['Protein Name'] = df.apply(protein_name_simplification, axis=1)   # uni has to be 0
+    df['Protein Name'] = df.apply(protein_name_simplification, axis=1)
 
     return df
 
 def most_abundant_entry_selection(x, freq_organism):
-    """This function selects the peptide chosen among all non-unique options depending on
-        the representation of the organism the peptide belong to
+    """Selects a peptide-inferred protein among all non-unique options depending on organism prevalence.
+
         INPUT
-        x: the data frame result from "pd_table_complete.protein_information.py" with
-           the protein options for the peptides
-        freq_organism: the sorted list of the organisms depending on their representation
+        x: DataFrame returned by "pd_table_complete.protein_information.py" with
+           the protein options for each identified peptide.
+        freq_organism: list of organisms sorted by representation
         """
 
     final_n = []
@@ -113,30 +108,25 @@ def most_abundant_entry_selection(x, freq_organism):
 
     return final, final_p, final_n, uni
 
-def protein_name_simplification(x, uni=0):
-    """This function perform a protein name simplification
+def protein_name_simplification(x):
+    """Simplifies protein name (takes only 4 first words max).
 
         INPUT
         x: a dataframe variable, completed and non-unique peptide selected dataframe output
            from Proteome Discoverer
-        uni: integer
-            uni = 0: when 1 protein name is reported for each signal
-            uni = 1: when more than 1 protein name is reported for each signal"""
-    if uni == 0:
-        name = x['Protein Name']
-        atoms = name.split()[:4]
-        return ' '.join(atoms)
 
-    elif uni == 1:
-        atoms = x.split(';')
-        list_ = []
-        for prot in atoms:
-            prot = prot.split()[:4]
-            list_.append(' '.join(prot))
-        return ';'.join(list_)
+    """
+
+    proteins = x['Protein Name'].split(';')
+    names = []
+    for protein in proteins:
+        words = protein.split()[:4]
+        names.append(' '.join(words))
+    return ';'.join(names)
 
 
 if __name__ == '__main__':
-
+    # TODO: This file has no entry with unique protein.
     df_sel_2 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel=2)
+    print(df_sel_2)
     
