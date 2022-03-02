@@ -1,7 +1,7 @@
 from collections import Counter
 import pd_table_complete as pdis
 
-def organism_selection(path__, sel = 1):
+def organism_selection(path__, sel=1):
     """This function completes the peptide output from Proteime Discoverer with the protein and
         organism they belong to, and it selects 1 option among the options of the
         non-unique peptides
@@ -17,7 +17,7 @@ def organism_selection(path__, sel = 1):
 
     if sel == 2:
         uniq = []
-        for code_ in df.loc[:,'Protein Group Accessions']:
+        for code_ in df.loc[:, 'Protein Group Accessions']:
             code_ = code_.split(';')
 
             if len(code_) == 1:
@@ -27,8 +27,8 @@ def organism_selection(path__, sel = 1):
         df.loc[:, 'Unique Pep'] = uniq
 
         for i in range(df.shape[0]):
-            df.loc[i,'Protein Name'] = protein_name_simplification(df.loc[i,'Protein Name'],
-                                                                   uni = 1) #uni has to be 1
+            df.loc[i, 'Protein Name'] = protein_name_simplification(df.loc[i, 'Protein Name'],
+                                                                   uni=1) #uni has to be 1
 
     else:
         all_species = []
@@ -51,7 +51,7 @@ def organism_selection(path__, sel = 1):
         df.loc[:, 'Organism Name'] = organism_selected
         df.loc[:, 'Unique Pep'] = uniq
 
-        df['Protein Name'] = df.apply(protein_name_simplification, axis = 1) # uni has to be 0
+        df['Protein Name'] = df.apply(protein_name_simplification, axis=1) # uni has to be 0
 
     return df
 
@@ -86,7 +86,7 @@ def most_abundant_entry_selection(x, frec_organism):
             species_a = prot.split(';')
             reps = []
 
-            for name,name_a,name_n in zip(species,species_a,n):
+            for name, name_a, name_n in zip(species, species_a, n):
                 reps.append((frec_organism[name_n], name, name_a, name_n))
             reps.sort(reverse=True)
 
@@ -113,7 +113,7 @@ def most_abundant_entry_selection(x, frec_organism):
 
     return final, final_p, final_n, uni
 
-def protein_name_simplification(x, uni = 0):
+def protein_name_simplification(x, uni=0):
     """This function perform a protein name simplification
 
         INPUT
@@ -137,5 +137,5 @@ def protein_name_simplification(x, uni = 0):
 
 if __name__ == '__main__':
 
-    df_sel_2 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel = 2)
+    df_sel_2 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel=2)
     
