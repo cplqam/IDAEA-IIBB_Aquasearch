@@ -17,35 +17,31 @@ def organism_selection(path__, sel=1):
     df = pdis.protein_information(path__)
 
     if sel == 2:
-        uniq = []
-        for code_ in df.loc[:, 'Protein Group Accessions']:
-            if ';' in code_:
-                uniq.append('No unique')
+        uniques = []
+        for accessions in df['Protein Group Accessions']:
+            if ';' in accessions:
+                uniques.append('No unique')
             else:
-                uniq.append('Unique')
-        df.loc[:, 'Unique Pep'] = uniq
+                uniques.append('Unique')
+        df.loc[:, 'Unique Pep'] = uniques
 
     else:
         all_species = []
-        species = list(df['Organism Name'])
-        for item in species:
-            if ';' in item:
-                names = item.split(';')
-                all_species.extend(names)
-            else:
-                all_species.append(item)
+        for species in df['Organism Name']:
+            names = species.split(';')
+            all_species.extend(names)
 
         species_count = Counter(all_species)
         most_common = species_count.most_common()
         freq_organism = dict(most_common)
 
         # TODO: Vectorize all this
-        protein_selected, accession_selected, organism_selected, uniq = most_abundant_entry_selection(df, freq_organism)
+        protein_selected, accession_selected, organism_selected, uniques = most_abundant_entry_selection(df, freq_organism)
 
         df.loc[:, 'Protein Group Accessions'] = accession_selected
         df.loc[:, 'Protein Name'] = protein_selected
         df.loc[:, 'Organism Name'] = organism_selected
-        df.loc[:, 'Unique Pep'] = uniq
+        df.loc[:, 'Unique Pep'] = uniques
 
     df['Protein Name'] = df.apply(protein_name_simplification, axis=1)
     return df
