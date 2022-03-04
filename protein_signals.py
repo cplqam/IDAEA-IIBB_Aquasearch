@@ -37,6 +37,7 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
        options = 1: each signal can have 1 or more peptide signals associated
                     (pd_maldi_match.xml_complete(unique_ = 1))
     """
+    signals_inter = None
     protein_codes = maldi_complete['Protein Accession code']
     protein_codes = protein_codes.tolist()
 
@@ -107,6 +108,7 @@ def table_request(protein_code, signals, db='Aquasearch_study'):
        By default ppm = 100
        db: string. The name of the DB. By default: Aquasearch_study
        """
+
     try:
         table = sr.table_download(db, protein_code)
         table_length = len(table)
@@ -182,7 +184,7 @@ def table_union(new, old1, old2, signals, db='Aquasearch_study'):
     if selected.empty is False:
         rel_intens = relat_intensity_calc(selected)
 
-        rel_intens_rounded = round(rel_intens.iloc[: , 2], 2)
+        rel_intens_rounded = round(rel_intens.iloc[:, 2], 2)
         mz_rounded = round(selected.iloc[:, 0], 4)
         signals_interest = pd.DataFrame({'mz': mz_rounded, 'relative intensity': rel_intens_rounded,
                                          'Unique': uni})
