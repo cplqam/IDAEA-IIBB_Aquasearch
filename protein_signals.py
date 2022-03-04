@@ -3,7 +3,7 @@ import sqlite3
 import pandas as pd
 import sqlite_requests as sr
 
-def table_comprobation(protein_code, db='Aquasearch_study'):
+def table_check(protein_code, db='Aquasearch_study'):
     """Checks if the database and a table with the protein accession code name exist.
        If any of them do not exist, it is created
 
@@ -85,7 +85,7 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
                 signals_inter.loc[i, 'Protein'] = protein_[idx2]
                 signals_inter.loc[i, 'Unique Pep'] = uni[idx2]
 
-    table_comprobation(protein_code)
+    table_check(protein_code)
     table_examined = table_request(protein_code, signals_inter)
     try:
         sr.eliminate_table('Aquasearch_study', protein_code)
