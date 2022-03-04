@@ -205,11 +205,8 @@ def relat_intensity_calc(table_):
     """
     table_final = table_
     max_int = max(table_final.iloc[:, 1])
-    list_ri = []
 
-    for intens in table_final.iloc[:, 1]:
-        i_r = intens / max_int * 100
-        list_ri.append(i_r)
+    list_ri = [intens / max_int * 100 for intens in table_final.iloc[:, 1]]
 
     table_final['relative intensity'] = list_ri
 
