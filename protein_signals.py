@@ -23,8 +23,7 @@ def table_check(protein_code, db='Aquasearch_study'):
 
 
 def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
-    """Creates or completes a table with the peptide signals belonging to
-       the same protein in a mix sample
+    """Creates or completes a table with the peptide signals belonging to protein <protein_code> in a protein mix.
 
        protein_code: string. The name of the table (protein accession code)
        maldi_complete: Dataframe. The signals from MALDI with all peptide information.
@@ -37,7 +36,7 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
        options = 1: each signal can have 1 or more peptide signals associated
                     (pd_maldi_match.xml_complete(unique_ = 1))
     """
-    signals_inter = None
+    signals_inter = None      # signals of interest ?
     protein_codes = maldi_complete['Protein Accession code']
     protein_codes = protein_codes.tolist()
 
@@ -98,15 +97,15 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
 
 
 def table_request(protein_code, signals, db='Aquasearch_study'):
-    """This function completes the table belonging to a protein accession code
+    """Completes the table belonging to a protein accession code
        with the new signals in the found in the new sample
 
        protein_code: string. The name of the table
        signals: Dataframe. The signals (mz and intensity) in the new sample
        belonging to the protein of interest
        ppm: integer. Maximum error allowed for considering two signal as the same.
-       By default ppm = 100
-       db: string. The name of the DB. By default: Aquasearch_study
+            Default ppm = 100
+       db: string. The name of the DB. Default: "Aquasearch_study"
        """
 
     try:
@@ -115,18 +114,20 @@ def table_request(protein_code, signals, db='Aquasearch_study'):
     except sqlite3.OperationalError:
         table_length = 0
 
-    if table_length == 0:  # If table is empty, the signals of interest are introduced
+    if table_length == 0:     # If table is empty, the signals of interest are introduced
         try:
             mz_rounded = round(signals.loc[:, 'mz'], 4)
             rel_int = round(signals.loc[:, 'relative intensity'], 2)
-            table_new = pd.DataFrame({'mz': mz_rounded, 'relative intensity': rel_int,
+            table_new = pd.DataFrame({'mz': mz_rounded,
+                                      'relative intensity': rel_int,
                                       'Unique': signals.loc[:, 'Unique Pep']})
         except KeyError:
             table_new = pd.DataFrame()
     else:
         table = pd.DataFrame(table, columns=['mz', 'relative intensity', 'Unique'])
         try:
-            signals = pd.DataFrame({'mz': signals.iloc[:, 0], 'relative intensity': signals.iloc[:, 6],
+            signals = pd.DataFrame({'mz': signals.iloc[:, 0],
+                                    'relative intensity': signals.iloc[:, 6],
                                     'Unique': signals.iloc[:, 5]})
         except IndexError:
             pass
@@ -172,7 +173,7 @@ def table_union(new, old1, old2, signals, db='Aquasearch_study'):
             uni.append('No unique')
 
     selected = signals.iloc[idx, [0, 1]]
-    
+
     try:
         table = sr.table_download(db, new)
         table = pd.DataFrame(table, columns=['mz', 'relative intensity', 'Unique'])
@@ -197,8 +198,8 @@ def table_union(new, old1, old2, signals, db='Aquasearch_study'):
             sr.insert_spectrum(db, table_examined, new)
         else:
             sr.insert_spectrum(db, signals_interest, new)
-        
-        
+
+
 def relat_intensity_calc(table_):
     """Calculates the relative intensity of the signals belonging to a sample
        and adds this information as a new column
