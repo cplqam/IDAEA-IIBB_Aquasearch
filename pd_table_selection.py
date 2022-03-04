@@ -11,7 +11,7 @@ def organism_selection(path__, sel=1):
         (1152, 19)
 
         >>> df_sel_2.loc[11, 'Protein Name']
-    	'Alpha-amylase 1A;Alpha-amylase 2B;Pancreatic alpha-amylase'
+        'Alpha-amylase 1A;Alpha-amylase 2B;Pancreatic alpha-amylase'
 
         >>> df_sel_2.loc[11, 'Unique Pep']
         'No unique'
@@ -45,7 +45,7 @@ def organism_selection(path__, sel=1):
         most_common = species_count.most_common()
         freq_organism = dict(most_common)
 
-        # TODO: Vectorize all this
+        # TODO: Vector all this
         protein_selected, accession_selected, organism_selected, uniques = most_abundant_entry_selection(df, freq_organism)
 
         df.loc[:, 'Protein Group Accessions'] = accession_selected
