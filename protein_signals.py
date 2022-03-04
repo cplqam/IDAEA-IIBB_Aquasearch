@@ -43,9 +43,9 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
 
     if options == 0:
         idx = []
-        for i in enumerate(protein_codes):
-            if protein_codes[i[0]] == protein_code:
-                idx.append(i[0])
+        for i, code_i in enumerate(protein_codes):
+            if code_i == protein_code:
+                idx.append(i)
 
         signals_inter = maldi_complete.iloc[idx, :]
         signals_inter = signals_inter.reset_index().drop(['index'], axis=1)
@@ -54,13 +54,12 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
 
     elif options == 1:
         idx = []
-        for i in enumerate(protein_codes):
-            prot_query = protein_codes[i[0]]
-            prot_query = prot_query.split(';')
+        for i, code_i in enumerate(protein_codes):
+            prot_query = code_i.split(';')
 
             for prot in prot_query:
                 if prot == protein_code:
-                    idx.append(i[0])
+                    idx.append(i)
 
         signals_inter = maldi_complete.iloc[idx, :]
         signals_inter = signals_inter.reset_index().drop(['index'], axis=1)
@@ -78,10 +77,9 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
                 uni = uni.split(';')
 
                 idx2 = 0
-                for j in enumerate(access_cod):
-                    prot_i = access_cod[j[0]]
-                    if prot_i == protein_code:
-                        idx2 = j[0]
+                for j, access_j in enumerate(access_cod):
+                    if access_j == protein_code:
+                        idx2 = j
 
                 signals_inter.loc[i, 'Protein Accession code'] = access_cod[idx2]
                 signals_inter.loc[i, 'Organism'] = organism[idx2]
@@ -155,11 +153,8 @@ def table_union(new, old1, old2, signals, db = 'Aquasearch_study'):
 
     idx = []
     uni = []
-
-
-    for i in enumerate(protein_codes):
-        signal_code = protein_codes[i[0]]
-        signal_code = signal_code.split(';')
+    for i, codes in enumerate(protein_codes):
+        signal_code = codes.split(';')
         num_pep = len(signal_code)
         counter = 0
 
@@ -169,10 +164,10 @@ def table_union(new, old1, old2, signals, db = 'Aquasearch_study'):
             counter += 1
 
         if (counter == num_pep) & (counter >= 1):
-            idx.append(i[0])
+            idx.append(i)
             uni.append('Unique')
         elif (counter < num_pep) & (counter >= 1):
-            idx.append(i[0])
+            idx.append(i)
             uni.append('No unique')
 
     selected = signals.iloc[idx,[0,1]]
