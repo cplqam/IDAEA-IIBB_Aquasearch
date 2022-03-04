@@ -103,7 +103,7 @@ def table_request(protein_code, signals, db='Aquasearch_study'):
 
        protein_code: string. The name of the table
        signals: Dataframe. The signals (mz and intensity) in the new sample
-       belonging to the protein of interes
+       belonging to the protein of interest
        ppm: integer. Maximum error allowed for considering two signal as the same.
        By default ppm = 100
        db: string. The name of the DB. By default: Aquasearch_study
@@ -141,7 +141,7 @@ def table_request(protein_code, signals, db='Aquasearch_study'):
 
 
 def table_union(new, old1, old2, signals, db='Aquasearch_study'):
-    """This function selects the peptide signals of 2 different proteins in the same group
+    """Selects the peptide signals of 2 different proteins in the same group
 
        new: string. The name of the new table by the combination of the 2 protein codes
        old1: string. The name of one protein you want to combine
@@ -157,17 +157,17 @@ def table_union(new, old1, old2, signals, db='Aquasearch_study'):
     for i, codes in enumerate(protein_codes):
         signal_code = codes.split(';')
         num_pep = len(signal_code)
-        counter = 0
 
-        if old1 in signal_code:
-            counter += 1
-        if old2 in signal_code:
-            counter += 1
+        # possible counter values: [0, 1, 2]
+        counter = sum([old1 in signal_code, old2 in signal_code])
 
-        if (counter == num_pep) & (counter >= 1):
+        if counter == 0:
+            continue
+
+        if counter == num_pep:
             idx.append(i)
             uni.append('Unique')
-        elif (counter < num_pep) & (counter >= 1):
+        elif counter < num_pep:
             idx.append(i)
             uni.append('No unique')
 
