@@ -31,10 +31,10 @@ def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray, u_infor,
 
     matches = find_matches(spec1[:, 0], spec2, u_infor, tolerance, shift)
     try:
-        dat_base = spec2[matches[:,1],:]
-        dat_base = np.array([dat_base[:,0], dat_base[:,1], matches[:,2]]).transpose()
-        req = spec1[matches[:,0],:]
-        req[:,1] = (req[:,1]/max(req[:,1]))*100
+        dat_base = spec2[matches[:, 1], :]
+        dat_base = np.array([dat_base[:, 0], dat_base[:, 1], matches[:, 2]]).transpose()
+        req = spec1[matches[:, 0], :]
+        req[:, 1] = (req[:, 1] / max(req[:, 1])) * 100
         if len(req) == 0:
             pass
         matching_pairs = []
@@ -57,8 +57,9 @@ def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray, u_infor,
 def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray, u_inf,
                  tolerance: float, shift: float = 0):
     """Faster search for matching peaks.
-    Makes use of the fact that spec1 and spec2 contain ordered peak m/z (from
-    low to high m/z).
+
+    Makes use of the fact that spec1 and spec2 contain ordered peak m/z (from low to high m/z).
+
     Parameters
     ----------
     spec1_mz:
@@ -129,12 +130,12 @@ def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0,
             used_matches += 1
             unique_used += matching_pairs[i, 3]
 
-            arr = np.array([matching_pairs[i, 0],matching_pairs[i, 1],matching_pairs[i, 2]]).transpose()
+            arr = np.array([matching_pairs[i, 0], matching_pairs[i, 1], matching_pairs[i, 2]]).transpose()
             signals_used = np.concatenate((signals_used, [arr]), axis=0)
 
         # If not, it is added to an array where the repeats will be
         else:
-            rep = np.append(rep, np.array([[mz_1, mz_2, sco, matching_pairs[i,3]]]), axis=0)
+            rep = np.append(rep, np.array([[mz_1, mz_2, sco, matching_pairs[i, 3]]]), axis=0)
 
     rep_def = np.empty((0, 4), int)
 
@@ -182,7 +183,7 @@ def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0,
         used_matches += 1
         unique_used += rep_def[i, 3]
 
-        arr = np.array([rep_def[i, 0],rep_def[i, 1],rep_def[i, 2]]).transpose()
+        arr = np.array([rep_def[i, 0], rep_def[i, 1], rep_def[i, 2]]).transpose()
         signals_used = np.concatenate((signals_used, [arr]), axis=0)
 
     if score != 0:
@@ -242,7 +243,7 @@ if __name__ == '__main__':
     table = pd.DataFrame(table, columns=('mz', 'intensity', 'Unique'))
     mz_s = table['mz'].squeeze()
     int_s = table['intensity'].squeeze()
-    u_i = list(table.loc[:,'Unique'])
+    u_i = list(table.loc[:, 'Unique'])
 
     mz_int = np.array([mz_s, int_s]).transpose()
 
@@ -255,7 +256,7 @@ if __name__ == '__main__':
     # score, used_m, unique_u = score_best_matches(matches2, spect1_arr, mz_int,
     #                                              mz_power = 0.0, intensity_power= 1.0)
 
-    res, res2 = request_scores('test_files/mcE61_Figueres.xml', tolerance = 0.05, shift =  0,
-                               mz_power = 0,intensity_power = 1.0, dat_b='Aquasearch_study')
+    res, res2 = request_scores('test_files/mcE61_Figueres.xml', tolerance=0.05, shift=0,
+                               mz_power=0, intensity_power=1.0, dat_b='Aquasearch_study')
 
     
