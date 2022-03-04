@@ -179,7 +179,7 @@ def table_union(new, old1, old2, signals, db='Aquasearch_study'):
         sr.create_table_protein(db, new)
         table_size = 0
 
-    if selected.empty == False: 
+    if selected.empty is False:
         rel_intens = relat_intensity_calc(selected)
 
         rel_intens_rounded = round(rel_intens.iloc[: , 2], 2)
