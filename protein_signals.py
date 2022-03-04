@@ -4,9 +4,8 @@ import pandas as pd
 import sqlite_requests as sr
 
 def table_comprobation(protein_code, db='Aquasearch_study'):
-    """This function checks if the database and a table with the
-       protein accession code name exist. If any of them do not exist,
-       it is created
+    """Checks if the database and a table with the protein accession code name exist.
+       If any of them do not exist, it is created
 
        protein_code: string. The name of the table (protein accession code)
        db: string. The name of the DB. By default: Aquasearch_study
@@ -24,7 +23,7 @@ def table_comprobation(protein_code, db='Aquasearch_study'):
 
 
 def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
-    """This function creates or complete a table with the peptide signals belonging to
+    """Creates or completes a table with the peptide signals belonging to
        the same protein in a mix sample
 
        protein_code: string. The name of the table (protein accession code)
@@ -199,8 +198,8 @@ def table_union(new, old1, old2, signals, db = 'Aquasearch_study'):
         
         
 def relat_intensity_calc(table_):
-    """This function calculates the relative intensity of the signals belonging to a sample
-       and add this information as a new column
+    """Calculates the relative intensity of the signals belonging to a sample
+       and adds this information as a new column
 
        table_: Dataframe. The result from pd_maldi_match.xml_complete.py
     """
@@ -215,6 +214,7 @@ def relat_intensity_calc(table_):
     table_final['relative intensity'] = list_ri
 
     return table_final
+
 
 # To test the functions
 if __name__ == '__main__':
