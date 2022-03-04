@@ -96,7 +96,7 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
         sr.insert_spectrum(db, table_examined, protein_code)
 
 
-def table_request(protein_code, signals, db = 'Aquasearch_study'):
+def table_request(protein_code, signals, db='Aquasearch_study'):
     """This function completes the table belonging to a protein accession code
        with the new signals in the found in the new sample
 
@@ -128,7 +128,7 @@ def table_request(protein_code, signals, db = 'Aquasearch_study'):
                                     'Unique': signals.iloc[:, 5]})
         except IndexError:
             pass
-        table_new = table.append(signals, ignore_index= True)
+        table_new = table.append(signals, ignore_index=True)
 
         table_new['mz'] = round(table_new['mz'], 4)
         table_new['relative intensity'] = round(table_new['relative intensity'], 2)
@@ -138,7 +138,7 @@ def table_request(protein_code, signals, db = 'Aquasearch_study'):
     return table_new
 
 
-def table_union(new, old1, old2, signals, db = 'Aquasearch_study'):
+def table_union(new, old1, old2, signals, db='Aquasearch_study'):
     """This function selects the peptide signals of 2 different proteins in the same group
 
        new: string. The name of the new table by the combination of the 2 protein codes
@@ -169,7 +169,7 @@ def table_union(new, old1, old2, signals, db = 'Aquasearch_study'):
             idx.append(i)
             uni.append('No unique')
 
-    selected = signals.iloc[idx,[0,1]]
+    selected = signals.iloc[idx, [0, 1]]
     
     try:
         table = sr.table_download(db, new)
@@ -182,8 +182,8 @@ def table_union(new, old1, old2, signals, db = 'Aquasearch_study'):
     if selected.empty == False: 
         rel_intens = relat_intensity_calc(selected)
 
-        rel_intens_rounded = round(rel_intens.iloc[:,2], 2)
-        mz_rounded = round(selected.iloc[:,0],4)
+        rel_intens_rounded = round(rel_intens.iloc[: , 2], 2)
+        mz_rounded = round(selected.iloc[:, 0], 4)
         signals_interest = pd.DataFrame({'mz': mz_rounded, 'relative intensity': rel_intens_rounded,
                                          'Unique': uni})
         if table_size > 0:
