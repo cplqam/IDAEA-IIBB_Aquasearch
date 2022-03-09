@@ -77,12 +77,8 @@ def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray, u_inf,
         List containing entries of type (idx1, idx2).
     """
 
-    u_inf2 = []
-    for i in u_inf:
-        if i == 'Unique':
-            u_inf2.append(1)
-        elif i == 'No unique':
-            u_inf2.append(0)
+    u_inf = map(int, u_inf)
+    u_inf = list(u_inf)
 
     lowest_idx = 0
     matches = []
@@ -97,7 +93,7 @@ def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray, u_inf,
             if mz2 < low_bound:
                 lowest_idx = peak2_idx
             else:
-                matches.append((peak1_idx, peak2_idx, u_inf2[peak2_idx]))
+                matches.append((peak1_idx, peak2_idx, u_inf[peak2_idx]))
     matches = np.array(matches)
     return matches
 
@@ -111,8 +107,6 @@ def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0,
     """
     score = float(0.0)
     used_matches = int(0)
-    used1 = set()
-    used2 = set()
     unique_used = int(0)
     rep = np.empty((0, 4), int)
     signals_used = np.empty((0, 3), int)
@@ -125,8 +119,6 @@ def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0,
         # If the peak only appears 1 time, it is added directly to the score
         if np.count_nonzero(matching_pairs[:, 0] == mz_1) == 1 and np.count_nonzero(matching_pairs[:, 1] == mz_2) == 1:
             score += matching_pairs[i, 2]
-            used1.add(matching_pairs[i, 0])
-            used2.add(matching_pairs[i, 1])
             used_matches += 1
             unique_used += matching_pairs[i, 3]
 
@@ -178,8 +170,6 @@ def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0,
 
     for i in range(rep_def.shape[0]):
         score += rep_def[i, 2]
-        used1.add(rep_def[i, 0])
-        used2.add(rep_def[i, 1])
         used_matches += 1
         unique_used += rep_def[i, 3]
 
@@ -256,7 +246,7 @@ if __name__ == '__main__':
     # score, used_m, unique_u = score_best_matches(matches2, spect1_arr, mz_int,
     #                                              mz_power = 0.0, intensity_power= 1.0)
 
-    res, res2 = request_scores('test_files/mcE61_Figueres.xml', tolerance=0.05, shift=0,
+    res_, res2_ = request_scores('test_files/mcE61_Figueres.xml', tolerance=0.05, shift=0,
                                mz_power=0, intensity_power=1.0, dat_b='Aquasearch_study')
 
     

@@ -27,15 +27,14 @@ def complete_table_proteins(proteins_file, n=10):
 
     """
 
-    df_final = pd.read_excel(proteins_file)
-    df_final = df_final.head(n)
+    df_full = pd.read_excel(proteins_file)
+    df_full = df_full.head(n)
+    
+    df_full[['Protein Name', 'Organism Name']] = df_full.apply(split_description, axis=1, result_type='expand')   
+    df_names = df_full[['Accession', 'Organism Name', 'Protein Name']]
+    df_names = df_names.rename(columns={'Accession':'Protein Accession code'})
 
-    df_final[['Protein Name', 'Organism Name']] = df_final.apply(split_description, axis=1, result_type='expand')
-    list_final = df_final[['Accession', 'Organism Name', 'Protein Name']]
-
-    # TODO: Both are dataframes. Using 'list' creates confusion. Change return names in function calls
-    #      for example: df_full, df_names
-    return df_final, list_final
+    return df_full, df_names
 
 
 def maldi_ident_join(dictionary, maldi):
@@ -66,21 +65,18 @@ def maldi_ident_join(dictionary, maldi):
     size = mz_maldi.shape[0]
     alist = ['-'] * size
 
-    # TODO: Be consistent with column names.
-    #  for example, here: 'Organism', 'Protein Accession code'
-    #  other places: 'Organism Name', 'Accession'
     df = pd.DataFrame({'mz': maldi[:, 0], 'intensity': maldi[:, 1], 'Protein': alist,
-                       'Organism': alist, 'Protein Accession code': alist, 'Unique Pep': alist
+                       'Organism Name': alist, 'Protein Accession code': alist, 'Unique Pep': alist
                        })
 
     for mz_k, value in dictionary.items():
-        prot, org, cod, pep_ = value[0].split('|')
+        prot_name, org_name, accession, unique_pep = value[0].split('|')
 
         pos = numpy.where(mz_maldi == mz_k)[0]
-        df.loc[pos, 'Protein'] = prot
-        df.loc[pos, 'Organism'] = org
-        df.loc[pos, 'Protein Accession code'] = cod
-        df.loc[pos, 'Unique Pep'] = pep_
+        df.loc[pos, 'Protein'] = prot_name
+        df.loc[pos, 'Organism Name'] = org_name
+        df.loc[pos, 'Protein Accession code'] = accession
+        df.loc[pos, 'Unique Pep'] = unique_pep
     return df
 
 
@@ -95,9 +91,9 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
        mz                                                              1161.503095
        intensity                                                      16112.227734
        Protein                   Carcinoembryonic antigen-related cell adhesion...
-       Organism                                       Homo sapiens ;Gallus gallus
+       Organism Name                                  Homo sapiens ;Gallus gallus 
        Protein Accession code                                        P06731;P80566
-       Unique Pep                                              No unique;No unique
+       Unique Pep                                                              0;0
        Name: 3, dtype: object
 
         INPUT
@@ -115,10 +111,10 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
     """
     target_columns = ['Protein Name', 'Organism Name', 'Protein Group Accessions', 'Unique Pep']
     df, mz_int = load_archives.parse_xml(xml_)
-    df_ident, list_ident = complete_table_proteins(ident_prot, n_)
+    df_ident, df_names = complete_table_proteins(ident_prot, n_)
 
     dictionary = {}
-    if unique_ == 1:
+    if unique_:
         identifications = pd_table_selection.organism_selection(ident_pep, sel=2)
         for ion in mz_int:
             mz_xml = ion[0]
@@ -140,51 +136,51 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                     elif options >= 2:
                         for n in range(options):
                             candidate = app[n:-1:options]
-                            candidate.append('No unique')
+                            candidate.append('0')
                             a = ';'.join(candidate)
                             list_po.append(a)
 
             list_po = list(pd.unique(list_po))
             if len(list_po) >= 2:
-                p_n = []
-                p_o = []
-                p_c = []
-                p_u = []
+                p_protein_name = []
+                p_organism_name = []
+                p_accession = []
+                p_unique = []
 
                 for po in list_po:
                     candidate = po.split(';')
-                    query = candidate[2]
-                    for num2 in range(len(list_ident)):
-                        answer = list_ident.iloc[num2, 0]
-                        if query == answer:
-                            p_n.append(candidate[0])
-                            p_o.append(candidate[1])
-                            p_c.append(candidate[2])
-                            p_u.append('No unique')
+                    acc = candidate[2]
+                    for num2 in range(len(df_names)):
+                        answer = df_names.iloc[num2, 0]
+                        if acc == answer:
+                            p_protein_name.append(candidate[0])
+                            p_organism_name.append(candidate[1])
+                            p_accession.append(candidate[2])
+                            p_unique.append('0')
 
-                if len(p_n) >= 1:
-                    p_n = ';'.join(p_n)
-                    p_o = ';'.join(p_o)
-                    p_c = ';'.join(p_c)
-                    p_u = ';'.join(p_u)
+                if len(p_protein_name) >= 1:
+                    p_protein_name = ';'.join(p_protein_name)
+                    p_organism_name = ';'.join(p_organism_name)
+                    p_accession = ';'.join(p_accession)
+                    p_unique = ';'.join(p_unique)
 
-                    list_po = [p_n, p_o, p_c, p_u]
+                    list_po = [p_protein_name, p_organism_name, p_accession, p_unique]
                     list_po = ['|'.join(list_po)]
                     dictionary[mz_xml] = list_po
 
             elif len(list_po) == 1:
 
                 candidate = list_po[0].split(';')
-                query = candidate[2]
-                for num2 in range(len(list_ident)):
-                    answer = list_ident.iloc[num2, 0]
+                acc = candidate[2]
+                for num2 in range(len(df_names)):
+                    answer = df_names.iloc[num2, 0]
 
-                    if query == answer:
+                    if acc == answer:
                         list_po = [candidate[0], candidate[1], candidate[2], candidate[3]]
                         list_po = ['|'.join(list_po)]
                         dictionary[mz_xml] = list_po
 
-    elif unique_ == 0:
+    else:
         identifications = pd_table_selection.organism_selection(ident_pep, sel=1)
         for i in range(mz_int.shape[0]):
             mz_xml = mz_int[i, 0]
@@ -192,9 +188,9 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
             for j in range(identifications.shape[0]):
                 mz_ident = identifications.loc[j, 'MH+ [Da]']
                 if mz_xml > mz_ident:
-                    ppm_calculated = (1 - (mz_ident / mz_xml)) * 1000000
+                    ppm_calculated = (1 - (mz_ident / mz_xml)) * 1E6
                 else:
-                    ppm_calculated = (1 - (mz_xml / mz_ident)) * 1000000
+                    ppm_calculated = (1 - (mz_xml / mz_ident)) * 1E6
 
                 if ppm_calculated <= ppm:
                     app = ';'.join([identifications.loc[j, 'Protein Name'],
@@ -205,14 +201,14 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
 
             if len(list_po) >= 2:
                 positions = []
-                for query in list_po:
+                for acc in list_po:
                     c = []
-                    query = query.split(';')[2]
+                    acc = acc.split(';')[2]
 
-                    for num2 in range(len(list_ident)):
-                        answer = list_ident.iloc[num2, 0]
-                        if query == answer:
-                            c.append(list(list_ident.iloc[:, 0]).index(query))
+                    for num2 in range(len(df_names)):
+                        answer = df_names.iloc[num2, 0]
+                        if acc == answer:
+                            c.append(list(df_names.iloc[:, 0]).index(acc))
 
                     if len(c) == 0:
                         c.append(n_+1)
@@ -228,13 +224,12 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
 
             elif len(list_po) == 1:
                 position = []
-                query = list_po[0]
-                query = query.split(';')[2]
+                acc = list_po[0]
+                acc = acc.split(';')[2]
 
-                for num2 in range(len(list_ident)):
-                    answer = list_ident.iloc[num2, 0]
-                    if query == answer:
-                        position.append(list(list_ident.iloc[:, 0]).index(query))
+                for num2, answer in enumerate(df_names):
+                    if acc == answer:
+                        position.append(list(df_names.iloc[:, 0]).index(acc))
 
                 if len(position) == 0:
                     position.append(n_ + 1)
@@ -242,15 +237,9 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
                 if position[0] < n_ + 1:
                     dictionary[mz_xml] = list_po
 
-    # TODO: This table shows non consistent names in column 'Organism'
     result = maldi_ident_join(dictionary, mz_int)
     return result
 
-def console_wide_view():
-    desired_width = 320
-    pd.set_option('display.width', desired_width)
-    # np.set_printoptions(linewidth=desired_width)
-    pd.set_option('display.max_columns', 10)
 
 
 if __name__ == '__main__':
@@ -259,8 +248,8 @@ if __name__ == '__main__':
     doctest.testmod()
 
 
-
-    console_wide_view()
+    import common_module as cm
+    cm.console_wide_view()
     result_1 = xml_complete('test_files/mcE61_Figueres.xml',
                             'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
                             'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)

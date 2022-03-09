@@ -14,7 +14,7 @@ def organism_selection(path__, sel=1):
         'Alpha-amylase 1A;Alpha-amylase 2B;Pancreatic alpha-amylase'
 
         >>> df_sel_2.loc[11, 'Unique Pep']
-        'No unique'
+        '0'
 
         INPUT
         path__: string. The path of the peptide output from Proteome Discoverer
@@ -30,9 +30,9 @@ def organism_selection(path__, sel=1):
         uniques = []
         for accessions in df['Protein Group Accessions']:
             if ';' in accessions:
-                uniques.append('No unique')
+                uniques.append('0')
             else:
-                uniques.append('Unique')
+                uniques.append('1')
         df.loc[:, 'Unique Pep'] = uniques
 
     else:
@@ -45,7 +45,7 @@ def organism_selection(path__, sel=1):
         most_common = species_count.most_common()
         freq_organism = dict(most_common)
 
-        # TODO: Vector all this
+        # TODO: Vector all this 
         protein_selected, accession_selected, organism_selected, uniques = most_abundant_entry_selection(df, freq_organism)
 
         df.loc[:, 'Protein Group Accessions'] = accession_selected
@@ -65,54 +65,54 @@ def most_abundant_entry_selection(x, freq_organism):
         freq_organism: list of organisms sorted by representation
         """
 
-    final_n = []
-    final_p = []
-    final = []
+    final_organism = []
+    final_accession = []
+    final_protein_name = []
     unique = []
 
     for n in range(len(x)):
         query = x.loc[n, 'Protein Name']
-        prot = x.loc[n, 'Protein Group Accessions']
+        accession = x.loc[n, 'Protein Group Accessions']
         nam = x.loc[n, 'Organism Name']
 
         if ';' not in query:
-            final.append(query)
-            final_p.append(prot)
-            final_n.append(nam)
-            unique.append("Unique")
+            final_protein_name.append(query)
+            final_accession.append(accession)
+            final_organism.append(nam)
+            unique.append('1')
 
         else:
-            n = nam.split(';')
+            query_names = nam.split(';')
             species = query.split(';')
-            species_a = prot.split(';')
+            acc_code = accession.split(';')
             reps = []
 
-            for name, name_a, name_n in zip(species, species_a, n):
-                reps.append((freq_organism[name_n], name, name_a, name_n))
+            for name, acc, name_n in zip(species, acc_code, query_names):
+                reps.append((freq_organism[name_n], name, acc, name_n))
             reps.sort(reverse=True)
 
             higher = 0
-            prob = []
-            prob_a = []
-            prob_n = []
-            for rep, item, rep_a, rep_n in reps:
+            prot_name_chosen = []
+            accession_chosen = []
+            organism_chosen = []
+            for rep, rep_prot, rep_acc, rep_org in reps:
                 if rep >= higher:
                     higher = rep       # assign the first entry (the higher in the list) to 'higher'
-                    prob.append(item)  # store all entries with the same frequency
-                    prob_a.append(rep_a)
-                    prob_n.append(rep_n)
+                    prot_name_chosen.append(rep_prot)  # store all entries with the same frequency
+                    accession_chosen.append(rep_acc)
+                    organism_chosen.append(rep_org)
                 else:
                     break
-                prob_a = list(set(prob_a))
+                
+            accession_chosen = list(set(accession_chosen))
+            final_accession.append(accession_chosen[0])
+            prot_name_chosen = list(set(prot_name_chosen))
+            final_protein_name.append(prot_name_chosen[0])
+            organism_chosen = list(set(organism_chosen))
+            final_organism.append(organism_chosen[0])
+            unique.append('0')
 
-            final_p.append(prob_a[0])
-            prob = list(set(prob))
-            final.append(prob[0])
-            prob_n = list(set(prob_n))
-            final_n.append(prob_n[0])
-            unique.append('No unique')
-
-    return final, final_p, final_n, unique
+    return final_protein_name, final_accession, final_organism, unique
 
 def protein_name_simplification(x):
     """Simplifies protein name (takes only 4 first words max).

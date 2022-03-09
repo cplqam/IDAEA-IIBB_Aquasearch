@@ -37,13 +37,13 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
                     (pd_maldi_match.xml_complete(unique_ = 1))
     """
     signals_inter = None      # signals of interest ?
-    protein_codes = maldi_complete['Protein Accession code']
-    protein_codes = protein_codes.tolist()
+    accessions = maldi_complete['Protein Accession code']
+    accessions = accessions.tolist()
 
     if options == 0:
         idx = []
-        for i, code_i in enumerate(protein_codes):
-            if code_i == protein_code:
+        for i, accession in enumerate(accessions):
+            if accession == protein_code:
                 idx.append(i)
 
         signals_inter = maldi_complete.iloc[idx, :]
@@ -53,11 +53,11 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
 
     elif options == 1:
         idx = []
-        for i, code_i in enumerate(protein_codes):
-            prot_query = code_i.split(';')
+        for i, accession in enumerate(accessions):
+            acc_code = accession.split(';')
 
-            for prot in prot_query:
-                if prot == protein_code:
+            for acc in acc_code:
+                if acc == protein_code:
                     idx.append(i)
 
         signals_inter = maldi_complete.iloc[idx, :]
@@ -68,7 +68,7 @@ def fill_table(protein_code, maldi_complete, db='Aquasearch_study', options=1):
             for i in range(signals_inter.shape[0]):
                 access_cod = signals_inter.loc[i, 'Protein Accession code']
                 access_cod = access_cod.split(';')
-                organism = signals_inter.loc[i, 'Organism']
+                organism = signals_inter.loc[i, 'Organism Name']
                 organism = organism.split(';')
                 protein_ = signals_inter.loc[i, 'Protein']
                 protein_ = protein_.split(';')
@@ -167,10 +167,10 @@ def table_union(new, old1, old2, signals, db='Aquasearch_study'):
 
         if counter == num_pep:
             idx.append(i)
-            uni.append('Unique')
+            uni.append('1')
         elif counter < num_pep:
             idx.append(i)
-            uni.append('No unique')
+            uni.append('0')
 
     selected = signals.iloc[idx, [0, 1]]
 

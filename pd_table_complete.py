@@ -31,6 +31,7 @@ def uniprot_information(accession):
             o = str(o[1])
             organism = organism + o
             organism = organism.strip('.')
+            organism = organism.split('(')[0]
         if o[0] == 'OC' and o[1].split(';')[0] == 'Eukaryote':
             organism = organism.split('(')[0]
          
@@ -72,90 +73,90 @@ def protein_information(path__, db='Aquasearch_study', table='protein_dictionary
         table: string array. Name of the table where we are saving the dictionary of eccession codes. Default: "protein_dictionary"
     """
     df = pd.read_excel(path__)
-    
+
     # Try to create a database if it doesn't exist
     if not os.path.exists(db):
         sr.create_db(db)
-    
+
     # Try to create a table if it doesn't exist
     try:
         sr.create_table_proteins_dic(db, table)
     except sqlite3.OperationalError:
         pass
 
-    group = df.loc[:, 'Protein Group Accessions'].unique()
-    name = {}
-    organ = {}
+    accessions = df.loc[:, 'Protein Group Accessions'].unique()
+    protein_name = {}
+    organism_name = {}
     exception_list = []
-    
-    for prot in group:
-        protein = prot.split(';')
-        l_n = ''
-        l_o = ''
-        long = len(protein)
+
+    for accession in accessions:
+        acc_code = accession.split(';')
+        list_prot = ''
+        list_organism = ''
+        long = len(acc_code)
         cont = 0
         
         while cont != long :
-            p = protein[cont]
-            data = sr.table_request_prot_dict(db, table, p)
+            acc = acc_code[cont]
+            data = sr.table_request_prot_dict(db, table, acc)
             if len(data) == 0:
                 # noinspection PyUnresolvedReferences
                 try:
-                    n, o = uniprot_information(p)
-                    df_u = pd.DataFrame({'Accession': [p], 'Protein name': [n], 'Organism': [o]})
-                    l_n = l_n + ';' + str(n)
-                    l_o = l_o + ';' + str(o)
+                    nam, org = uniprot_information(acc)
+                    df_u = pd.DataFrame({'Accession': [acc], 'Protein name': [nam], 'Organism': [org]})
+                    list_prot = list_prot + ';' + str(nam)
+                    list_organism = list_organism + ';' + str(org)
                     sr.insert_prot_code(db, table, df_u)
                 except ur.HTTPError:
-                    exception_list.append(p)
-                    protein.remove(p)
-                    if len(protein) > 1:
-                        prot = ';'.join(protein)
+                    exception_list.append(acc)
+                    acc_code.remove(acc)
+                    if len(acc_code) > 1:
+                        accession = ';'.join(acc_code)
                     cont = cont - 1
                     long = long-1
                 except ur.URLError: #If the host brak the conexion: sleep 10 sec and retry
                     time.sleep(10)
-                    n, o = uniprot_information(p)
-                    df_u = pd.DataFrame({'Accession': [p], 'Protein name': [n], 'Organism': [o]})
-                    l_n = l_n + ';' + str(n)
-                    l_o = l_o + ';' + str(o)
+                    nam, org = uniprot_information(acc)
+                    df_u = pd.DataFrame({'Accession': [acc], 'Protein name': [nam], 'Organism': [org]})
+                    list_prot = list_prot + ';' + str(nam)
+                    list_organism = list_organism + ';' + str(org)
                     sr.insert_prot_code(db, table, df_u)
 
             else:
-                n = data[0][0]
-                o = data[0][1]
-                l_n = l_n + ';' + str(n)
-                l_o = l_o + ';' + str(o) 
+                nam = data[0][0]
+                org = data[0][1]
+                list_prot = list_prot + ';' + str(nam)
+                list_organism = list_organism + ';' + str(org) 
             cont = cont + 1 
             
-        if len(prot) >= 1:            
-            name[prot] = l_n[1:]
-            organ[prot] = l_o[1:]
+        if len(accession) >= 1:            
+            protein_name[accession] = list_prot[1:]
+            organism_name[accession] = list_organism[1:]
             
     # Remove any possible exception because the uniprot code is unavailable 
     if len(exception_list) > 0:
         exception_list = list(dict.fromkeys(exception_list))
         print('These protein accesion codes are not recognized by Uniprot and therefore, they have been eliminated from the peptide file: ' + ', '.join(exception_list))
-    
+
         for exception_p in exception_list:
             for n in range(df.shape[0]):
-                prot = df.loc[n, 'Protein Group Accessions']
-                protein = prot.split(';')
+                acc_code = df.loc[n, 'Protein Group Accessions']
+                accession = acc_code.split(';')
             
-                if exception_p in protein:
-                    protein.remove(exception_p)
+                if exception_p in accession:
+                    accession.remove(exception_p)
                     c = 0
-                    if len(protein) > 1:
-                        protein = ';'.join(protein)
-                        df.loc[n, 'Protein Group Accessions'] = protein
-                    elif len(protein) == 1:
-                        df.loc[n, 'Protein Group Accessions'] = protein
-                    elif len(protein) == 0:
+                    if len(accession) > 1:
+                        accession = ';'.join(accession)
+                        df.loc[n, 'Protein Group Accessions'] = accession
+                    elif len(accession) == 1:
+                        df.loc[n, 'Protein Group Accessions'] = accession
+                    elif len(accession) == 0:
                         df = df.drop(n-c, axis=0)
                         c += 1        
         
-    name_p = table_complete(df, name)
-    name_o = table_complete(df, organ)
+    name_p = table_complete(df, protein_name)
+    name_o = table_complete(df, organism_name)
     df['Protein Name'] = name_p
     df['Organism Name'] = name_o
         
