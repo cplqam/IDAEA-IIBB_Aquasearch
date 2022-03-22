@@ -1,7 +1,14 @@
+import sys
+
 import numpy as np
 import load_archives
 import sqlite_requests as sr
 
+# TODO: should be relocated on a common module and imported if needed
+def dprint(*this):
+    """To allow debugging with prints when using doctest"""
+    that = ''.join(str(item) for item in this)
+    print(that, file=sys.stderr)
 
 def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray, u_infor,
                        tolerance: float, shift: float = 0, mz_power: float = 0.0,
@@ -103,18 +110,17 @@ def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray, u_inf,
 def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0,
                        intensity_power: float = 1.0):
     """Calculate cosine-like score by multiplying matches.
+
     Does require a sorted list of matching peaks (sorted by intensity product).
     """
-    score = float(0.0)
+    score = 0.0
     used_matches = int(0)
     unique_used = int(0)
     rep = np.empty((0, 4), int)
     signals_used = np.empty((0, 3), int)
 
     for i in range(matching_pairs.shape[0]):
-        mz_1 = matching_pairs[i, 0]
-        mz_2 = matching_pairs[i, 1]
-        sco = matching_pairs[i, 2]
+        mz_1, mz_2, sco = matching_pairs[i, :3]
 
         # If the peak only appears 1 time, it is added directly to the score
         if np.count_nonzero(matching_pairs[:, 0] == mz_1) == 1 and np.count_nonzero(matching_pairs[:, 1] == mz_2) == 1:
@@ -122,7 +128,7 @@ def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0,
             used_matches += 1
             unique_used += matching_pairs[i, 3]
 
-            arr = np.array([matching_pairs[i, 0], matching_pairs[i, 1], matching_pairs[i, 2]]).transpose()
+            arr = np.array(matching_pairs[i, 0:3]).transpose()
             signals_used = np.concatenate((signals_used, [arr]), axis=0)
 
         # If not, it is added to an array where the repeats will be
@@ -132,48 +138,42 @@ def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0,
     rep_def = np.empty((0, 4), int)
 
     # Within the repeated
-    for i in range(rep.shape[0]):
-        mz_1 = rep[i, 0]
-        mz_2 = rep[i, 1]
-        sco = rep[i, 2]
-        uni_ = rep[i, 3]
+    first = True
+    for mass_params in rep:
+        mz_1, mz_2, sco, uni_ = mass_params
 
-        if i == 0:
+        if first:
             # If it is the 1 element, it enters the definitive array
-            rep_def = np.append(rep_def, np.array([[mz_1, mz_2, sco, uni_]]), axis=0)
-        else:
-            # If it is not the first, it is checked that there is no equal mz in the list, of any of the 2 spectra
-            # If there is not the same mz
-            if np.count_nonzero(rep_def[:, 0] == mz_1) == 0 and np.count_nonzero(rep_def[:, 1] == mz_2) == 0:
-                # They enter the final array
-                rep_def = np.append(rep_def, np.array([[mz_1, mz_2, sco, uni_]]), axis=0)
+            rep_def = np.append(rep_def, np.array([mass_params]), axis=0)
+            first = False
+            continue
 
-            # If there is already an equal mz in the list,
-            # I compare the scores and leave the best one in that position of the array
-            elif np.count_nonzero(rep_def[:, 0] == mz_1) != 0:  # Compare with first data, if the first is:
-                rep1 = np.where(rep_def[:, 0] == mz_1)           # Get the index
-                # If its score is better, the values are replaced to get the best score for each signal
-                if sco > rep_def[rep1, 2]:
-                    rep_def[rep1, 0] = mz_1
-                    rep_def[rep1, 1] = mz_2
-                    rep_def[rep1, 2] = sco
-                    rep_def[rep1, 3] = uni_
+        # If it is not the first, it is checked that there is no equal mz in the list, of any of the 2 spectra
+        # If there is not the same mz
+        if np.all(rep_def[:, :2] != [mz_1, mz_2]):
+            # They enter the final array
+            rep_def = np.append(rep_def, np.array([mass_params]), axis=0)
 
-            elif np.count_nonzero(rep_def[:, 1] == mz_2) != 0:  # The same is done for the second mz
-                # If the two mz match, then it would take the best of the 3 (the two matches and the new one)
-                rep2 = np.where(rep_def[:, 1] == mz_2)
-                if sco > rep_def[rep2, 2]:
-                    rep_def[rep2, 0] = mz_1
-                    rep_def[rep2, 1] = mz_2
-                    rep_def[rep2, 2] = sco
-                    rep_def[rep1, 3] = uni_
+        # If there is already an equal mz in the list,
+        # I compare the scores and leave the best one in that position of the array
+        elif np.any(rep_def[:, 0] == mz_1):                  # Compare with first data, if the first is:
+            rep1 = np.where(rep_def[:, 0] == mz_1)           # Get the index
+            # If its score is better, the values are replaced to get the best score for each signal
+            if sco > rep_def[rep1, 2]:
+                rep_def[rep1] = mass_params
 
-    for i in range(rep_def.shape[0]):
-        score += rep_def[i, 2]
+        elif np.any(rep_def[:, 1] == mz_2):                  # The same is done for the second mz
+            # If the two mz match, then it would take the best of the 3 (the two matches and the new one)
+            rep2 = np.where(rep_def[:, 1] == mz_2)
+            if sco > rep_def[rep2, 2]:
+                rep_def[rep2] = mass_params
+
+    for mass_params_row in rep_def:
+        score += mass_params_row[2]
         used_matches += 1
-        unique_used += rep_def[i, 3]
+        unique_used += mass_params_row[3]
 
-        arr = np.array([rep_def[i, 0], rep_def[i, 1], rep_def[i, 2]]).transpose()
+        arr = np.array(mass_params_row[0:3]).transpose()
         signals_used = np.concatenate((signals_used, [arr]), axis=0)
 
     if score != 0:
