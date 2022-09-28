@@ -50,12 +50,6 @@ def maldi_ident_join(dictionary, maldi):
                  - accessions
                  - Unique/No unique
 
-        {1161.503094948756: ['Carcinoembryonic antigen-related cell adhesion;Superoxide dismutase [Cu-Zn]|Homo sapiens ;Gallus gallus |P06731;P80566|No unique;No unique'],
-        1213.601431420398: ['Protein AMBP;Immunoglobulin heavy constant alpha;Immunoglobulin alpha-2 heavy chain|Homo sapiens ;Homo sapiens ;Homo sapiens |P02760;P01876;P0DOX2|No unique;No unique;No unique'],
-       .................................................................................................................
-        2599.235296717235: ['Albumin|Homo sapiens |P02768|Unique'],
-        2990.446067568852: ['Alpha-amylase 1A;Alpha-amylase 2B|Homo sapiens (Human);Homo sapiens |P0DUB6;P19961|No unique;No unique']}
-
         maldi: an array variable, it contains the maz and intensity from MALDI spectrum
 
     """
@@ -66,38 +60,47 @@ def maldi_ident_join(dictionary, maldi):
     alist = ['-'] * size
 
     df = pd.DataFrame({'mz': maldi[:, 0], 'intensity': maldi[:, 1], 'Protein': alist,
-                       'Organism Name': alist, 'Protein Accession code': alist, 'Unique Pep': alist
+                       'Organism Name': alist, 'Protein Accession code': alist, 'Unique Pep': alist,
+                       'Standard signal':alist, 'Peptide seq': alist, 'Peptide mass': alist
                        })
 
     for mz_k, value in dictionary.items():
-        prot_name, org_name, accession, unique_pep = value[0].split('|')
+        # print(value)
+        prot_name, org_name, accession, unique_pep, stand_signal, pep_seq, pep_mm = value[0].split('|')
 
         pos = numpy.where(mz_maldi == mz_k)[0]
         df.loc[pos, 'Protein'] = prot_name
         df.loc[pos, 'Organism Name'] = org_name
         df.loc[pos, 'Protein Accession code'] = accession
         df.loc[pos, 'Unique Pep'] = unique_pep
+        df.loc[pos, 'Standard signal'] = stand_signal
+        df.loc[pos, 'Peptide seq'] = pep_seq
+        df.loc[pos, 'Peptide mass'] = pep_mm
+        
     return df
 
 
-def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
+def txt_complete(txt_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
     """Assigns the protein and organism name to the MALDI spectrum signals
 
-       >>> result = xml_complete('test_files/mcE61_Figueres.xml', 'test_files/mcE61_PD14_Figueres_Peptides.xlsx', 'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
+       >>> result = txt_complete('test_files/mcE61_Figueres.txt', 'test_files/mcE61_PD14_Figueres_Peptides.xlsx', 'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
        >>> result.shape
-       (69, 6)
+       (145, 9)
 
-       >>> result.iloc[3,:]
-       mz                                                              1161.503095
-       intensity                                                      16112.227734
-       Protein                   Carcinoembryonic antigen-related cell adhesion...
-       Organism Name                                  Homo sapiens ;Gallus gallus 
-       Protein Accession code                                        P06731;P80566
-       Unique Pep                                                              0;0
-       Name: 3, dtype: object
+       >>> result.iloc[11,:]
+       mz                                    1105.524
+       intensity                            3331.8413
+       Protein                   Maltase-glucoamylase
+       Organism Name                    Homo sapiens 
+       Protein Accession code                  O43451
+       Unique Pep                                   1
+       Standard signal                              0
+       Peptide seq                         FAGFPALINR
+       Peptide mass                         1106.6198
+       Name: 11, dtype: object
 
         INPUT
-        xml_: string. Path of the MALDI xml format file
+        txt_: string. Path of the MALDI txt format file
         ident_pep: string. Path of the file with the identified peptides from PD
         ident_prot: string. Path of the file with the identified proteins from PD
         n_: integer. Number of proteins selected depending on their representation.
@@ -106,137 +109,98 @@ def xml_complete(xml_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
              default ppm = 100
         unique_: integer.
                  unique_ = 1, all the possibilities are considered in non-unique peptides
-                 unique_ = 0, the non-unique peptides are included.
+                 unique_ = 0, 1 peptide is chosen among all non-unique peptides.
                  default unique_ = 1
     """
-    target_columns = ['Protein Name', 'Organism Name', 'Protein Group Accessions', 'Unique Pep']
-    df, mz_int = load_archives.parse_xml(xml_)
+    target_columns = ['Protein Name', 'Organism Name', 'Protein Group Accessions', 'Unique Pep', 'Standard signal', 'Sequence']
+    df, mz_int = load_archives.parse_txt(txt_)
     df_ident, df_names = complete_table_proteins(ident_prot, n_)
 
     dictionary = {}
     if unique_:
         identifications = pd_table_selection.organism_selection(ident_pep, sel=2)
-        for ion in mz_int:
-            mz_xml = ion[0]
-            delta_mz = ppm * mz_xml / 1E6
-            list_po = []
-            # TODO: itertuples is faster but needs column names being valid python identifiers
-            #       Should replace this with a vectorized method.
-            for idx, row in identifications.iterrows():
-                # Put in a list all Orbitrap signals, with their identification,
-                # which are related with the MALDI signal.
-                mz_ident = row['MH+ [Da]']
-                if abs(mz_ident - mz_xml) <= delta_mz:
-                    app = ';'.join([row[value] for value in target_columns])
-                    app = app.split(';')
+    else:
+        identifications = pd_table_selection.organism_selection(ident_pep, sel=1)
 
-                    options = (len(app)-1) // 3       # Last column Unique/No Unique
-                    if options == 1:
-                        list_po.append(';'.join(app))
-                    elif options >= 2:
-                        for n in range(options):
-                            candidate = app[n:-1:options]
-                            candidate.append('0')
-                            a = ';'.join(candidate)
-                            list_po.append(a)
+    for ion in mz_int:
+        mz_txt = ion[0]
+        delta_mz = ppm * mz_txt / 1E6
+        list_po = []
+        for idx, row in identifications.iterrows():
+            # Put in a list all Orbitrap signals, with their identification,
+            # which are related with the MALDI signal.
+            mz_ident = row['MH+ [Da]']
+            if abs(mz_ident - mz_txt) <= delta_mz:
+                app = ';'.join([row[value] for value in target_columns])
+                app = app.split(';')
+                app.append(str(round(mz_ident + 1.00784, 4)))
 
-            list_po = list(pd.unique(list_po))
-            if len(list_po) >= 2:
-                p_protein_name = []
-                p_organism_name = []
-                p_accession = []
-                p_unique = []
+                options = (len(app)-4) // 3       # Last columns Unique,Satndard,Peptide and mm
+                if options == 1:
+                    list_po.append(';'.join(app))
+                elif options >= 2:
+                    for n in range(options):       # Select each possible candidate
+                        if n == 0:
+                            fin = options * 3 
+                        else:
+                            fin = options * 3 + n
+                                
+                        candidate = app[n:fin:options]
+                        candidate.append(app[-4])
+                        candidate.append(app[-3])
+                        candidate.append(app[-2])
+                        candidate.append(app[-1])
+                        a = ';'.join(candidate)
+                        list_po.append(a)
+        list_po = list(pd.unique(list_po))
+        if len(list_po) >= 2:
+            p_protein_name = []
+            p_organism_name = []
+            p_accession = []
+            p_unique = []
+            p_stand = []
+            p_seq = []
+            p_mm = []
 
-                for po in list_po:
-                    candidate = po.split(';')
-                    acc = candidate[2]
-                    for num2 in range(len(df_names)):
-                        answer = df_names.iloc[num2, 0]
-                        if acc == answer:
-                            p_protein_name.append(candidate[0])
-                            p_organism_name.append(candidate[1])
-                            p_accession.append(candidate[2])
-                            p_unique.append('0')
-
-                if len(p_protein_name) >= 1:
-                    p_protein_name = ';'.join(p_protein_name)
-                    p_organism_name = ';'.join(p_organism_name)
-                    p_accession = ';'.join(p_accession)
-                    p_unique = ';'.join(p_unique)
-
-                    list_po = [p_protein_name, p_organism_name, p_accession, p_unique]
-                    list_po = ['|'.join(list_po)]
-                    dictionary[mz_xml] = list_po
-
-            elif len(list_po) == 1:
-
-                candidate = list_po[0].split(';')
+            for po in list_po:
+                candidate = po.split(';')
                 acc = candidate[2]
                 for num2 in range(len(df_names)):
                     answer = df_names.iloc[num2, 0]
-
                     if acc == answer:
-                        list_po = [candidate[0], candidate[1], candidate[2], candidate[3]]
-                        list_po = ['|'.join(list_po)]
-                        dictionary[mz_xml] = list_po
+                        p_protein_name.append(candidate[0])
+                        p_organism_name.append(candidate[1])
+                        p_accession.append(candidate[2])
+                        p_unique.append('0')
+                        p_stand.append(candidate[4])
+                        p_seq.append(candidate[5])
+                        p_mm.append(candidate[6])
+                        
 
-    else:
-        identifications = pd_table_selection.organism_selection(ident_pep, sel=1)
-        for i in range(mz_int.shape[0]):
-            mz_xml = mz_int[i, 0]
-            list_po = []
-            for j in range(identifications.shape[0]):
-                mz_ident = identifications.loc[j, 'MH+ [Da]']
-                if mz_xml > mz_ident:
-                    ppm_calculated = (1 - (mz_ident / mz_xml)) * 1E6
-                else:
-                    ppm_calculated = (1 - (mz_xml / mz_ident)) * 1E6
+            if len(p_protein_name) >= 1:
+                p_protein_name = ';'.join(p_protein_name)
+                p_organism_name = ';'.join(p_organism_name)
+                p_accession = ';'.join(p_accession)
+                p_unique = ';'.join(p_unique)
+                p_stand = ';'.join(p_stand)
+                p_seq = ';'.join(p_seq)
+                p_mm = ';'.join(p_mm)
 
-                if ppm_calculated <= ppm:
-                    app = ';'.join([identifications.loc[j, 'Protein Name'],
-                                    identifications.loc[j, 'Organism Name'],
-                                    identifications.loc[j, 'Protein Group Accessions'],
-                                    identifications.loc[j, 'Unique Pep']])
-                    list_po.append(app)
+                list_po = [p_protein_name, p_organism_name, p_accession, p_unique, p_stand, p_seq, p_mm]
+                list_po = ['|'.join(list_po)]
+                dictionary[mz_txt] = list_po
+                    
+        elif len(list_po) == 1:
 
-            if len(list_po) >= 2:
-                positions = []
-                for acc in list_po:
-                    c = []
-                    acc = acc.split(';')[2]
-
-                    for num2 in range(len(df_names)):
-                        answer = df_names.iloc[num2, 0]
-                        if acc == answer:
-                            c.append(list(df_names.iloc[:, 0]).index(acc))
-
-                    if len(c) == 0:
-                        c.append(n_+1)
-
-                    positions.append(c[0])
-
-                idx = positions.index(min(positions))
-                if positions[idx] < n_ + 1:
-                    prot_def = list_po[idx]
-                    list_po = prot_def
-                    list_po = [list_po]
-                    dictionary[mz_xml] = list_po
-
-            elif len(list_po) == 1:
-                position = []
-                acc = list_po[0]
-                acc = acc.split(';')[2]
-
-                for num2, answer in enumerate(df_names):
-                    if acc == answer:
-                        position.append(list(df_names.iloc[:, 0]).index(acc))
-
-                if len(position) == 0:
-                    position.append(n_ + 1)
-
-                if position[0] < n_ + 1:
-                    dictionary[mz_xml] = list_po
-
+            candidate = list_po[0].split(';')
+            acc = candidate[2]
+            for num2 in range(len(df_names)):
+                answer = df_names.iloc[num2, 0]
+                
+                if acc == answer:
+                    list_po = [candidate[0], candidate[1], candidate[2], candidate[3], candidate[4], candidate[5], candidate[6]]
+                    list_po = ['|'.join(list_po)]
+                    dictionary[mz_txt] = list_po
     result = maldi_ident_join(dictionary, mz_int)
     return result
 
@@ -250,25 +214,7 @@ if __name__ == '__main__':
 
     import common_module as cm
     cm.console_wide_view()
-    result_1 = xml_complete('test_files/mcE61_Figueres.xml',
+    result_1 = txt_complete('test_files/mcE61_Figueres.txt',
                             'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
-                            'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
+                            'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, ppm = 100, unique_=1)
 
-
-# C:\Python38\python.exe C:/Python38/programas/aquasearch/pd_maldi_match.py
-#              mz     intensity  ... Protein Accession code           Unique Pep
-# 0    832.300294   9016.435667  ...                      -                    -
-# 1    927.475515   5074.444521  ...                      -                    -
-# 2   1071.546896  10192.549118  ...                      -                    -
-# 3   1161.503095  16112.227734  ...          P06731;P80566  No unique;No unique
-# 4   1181.560038  21171.262371  ...                      -                    -
-# ..          ...           ...  ...                    ...                  ...
-# 64  2634.326469  23260.389467  ...                      -                    -
-# 65  2812.361993  10658.778184  ...                      -                    -
-# 66  2990.446068  17896.442913  ...          P0DUB6;P19961  No unique;No unique
-# 67  3003.349389   6511.268556  ...                      -                    -
-# 68  3016.452827  30834.559000  ...                      -                    -
-#
-# [69 rows x 6 columns]
-#
-# Process finished with exit code 0

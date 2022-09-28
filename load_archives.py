@@ -4,41 +4,35 @@ import numpy
 import sqlite_requests as sr
 
 # To import the tables from database
-def db_table_request(x):
+def db_table_request():
     """This function import a table from a SQLite dataset
-        
-        >>> tab,uniq = db_table_request('P19121')
-        >>> tab.shape[0] == len(uniq)
-        True
-        
-        >>> tab.shape[1] == 2
-        True
-    
-    """
-    table = sr.table_download('Aquasearch_study', x)
-    table = pd.DataFrame(table, columns=('mz', 'intensity', 'Unique'))
-    
-    if table.shape[0] > 1:
-        mz_s = table['mz'].squeeze()
-        int_s = table['intensity'].squeeze()
-    else:
-        mz_s = [table['mz'].squeeze()]
-        int_s = [table['intensity'].squeeze()]
-    
-    mz_int = numpy.array([mz_s,int_s]).transpose()
-    unique_inf = list(table.loc[:,'Unique'])
 
-    return mz_int, unique_inf
-    
+        >>> res = db_table_request()
+        >>> len(res) == list(res.keys())[-1]
+        True
+
+    """
+    table = sr.table_download('Aquasearch_study', 'Quantitative_information')
+    table = pd.DataFrame(table, columns=('protein', 'sequence', 'mz', 'intensity'))
+    dic = {}
+
+    n_prot = map(int,table['protein'])
+    max_prot = max(n_prot)
+    for num in range(int(max_prot)):
+        num = num + 1
+        dic[num] = table[table['protein'] == str(num)]
+
+    return dic
+
 
 # To import new requests
 def parse_xml(path_):
-    """This function import a table from a SQLite dataset
-        
+    """This function import a table from xml file
+
         >>> df_, mzint = parse_xml('test_files/mcE61_Figueres.xml')
         >>> df_.shape == mzint.shape
         True
-    
+
     """
     # Select mz and intensity columns, could take more if needed
     df_cols = ["mass", "intensity"]
@@ -62,35 +56,59 @@ def parse_xml(path_):
     mz_int_ = numpy.array([mz_s, int_s]).transpose()
     return out_df, mz_int_
 
+def parse_txt(path_):
+    """This function import a table from txt file
+
+        >>> df_2, mzint_2 = parse_txt('test_files/Standares/pmf_H1.txt')
+        >>> df_2.shape == mzint_2.shape
+        True
+
+    """
+
+    df_ = pd.read_csv(path_, sep = '\s+')
+    df_ = df_.iloc[:,[0,1,2]]
+
+    df_.columns =  ['mass', 'intensity', 'unique']
+
+    mz_s = df_['mass'].squeeze()
+    int_s = df_['intensity'].squeeze()
+    uniq_s = df_['unique'].squeeze()
+
+    mz_int = numpy.array([mz_s, int_s, uniq_s]).transpose()
+
+    return(df_, mz_int)
+
+def parse_txt_request(path_):
+    """This function import a table from txt file
+
+        >>> df_2, mzint_2 = parse_txt('test_files/Standares/pmf_H1.txt')
+        >>> df_2.shape == mzint_2.shape
+        True
+
+    """
+
+    df_ = pd.read_csv(path_, sep = '\s+')
+    df_ = df_.iloc[:,[0,1]]
+
+    df_.columns =  ['mass', 'intensity']
+
+    mz_s = df_['mass'].squeeze()
+    int_s = df_['intensity'].squeeze()
+
+    mz_int = numpy.array([mz_s, int_s]).transpose()
+
+    return(df_, mz_int)
 
 # To test the function
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
-    
+
     # Pair the data from an XML file
-    
 
+    prueba, prueba_2 = parse_txt('test_files/Standares/pmf_H1_completed.txt')
     df, mz_int = parse_xml('test_files/mcE61_Figueres.xml')
-    table,unique_inf = db_table_request('P19121')
-
-######ALSO LET THE OPTION TO DO IT FROM EXCEL#######
-
-# import pandas as pd
-# import numpy
-
-# def parse_excel(path_):
-#     df = pd.read_excel(path_,header=2)
-
-#     # Select mz, intensity and area columns to compare with database
-#     df_2 = df[['m/z','Intens.','Area']]
-
-#     mz_int = numpy.array([pd.DataFrame.to_numpy(df_2.loc[:,'m/z']),
-#                           pd.DataFrame.to_numpy(df_2.loc[:,'Intens.'])])
-#     mz_int = numpy.transpose(mz_int)
-#     return df_2,mz_int
-
-# if __name__ == '__main__':
-#   df,mz_int = parse_excel('test_files/mcE61_Figueres.xml')
-
-# #######ALSO LET THE OPTION TO DO IT FROM EXCEL#######
+    try:
+        results = db_table_request()
+    except ValueError:
+        print('no existen las tablas')

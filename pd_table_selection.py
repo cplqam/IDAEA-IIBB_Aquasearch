@@ -8,7 +8,7 @@ def organism_selection(path__, sel=1):
 
         >>> df_sel_2 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel = 2)
         >>> df_sel_2.shape
-        (1152, 19)
+        (1152, 20)
 
         >>> df_sel_2.loc[11, 'Protein Name']
         'Alpha-amylase 1A;Alpha-amylase 2B;Pancreatic alpha-amylase'
@@ -25,7 +25,7 @@ def organism_selection(path__, sel=1):
     """
 
     df = pdis.protein_information(path__)
-
+    
     if sel == 2:
         uniques = []
         for accessions in df['Protein Group Accessions']:
@@ -45,7 +45,6 @@ def organism_selection(path__, sel=1):
         most_common = species_count.most_common()
         freq_organism = dict(most_common)
 
-        # TODO: Vector all this 
         protein_selected, accession_selected, organism_selected, uniques = most_abundant_entry_selection(df, freq_organism)
 
         df.loc[:, 'Protein Group Accessions'] = accession_selected
@@ -54,6 +53,7 @@ def organism_selection(path__, sel=1):
         df.loc[:, 'Unique Pep'] = uniques
 
     df['Protein Name'] = df.apply(protein_name_simplification, axis=1)
+    df['Standard signal'] = '0'
     return df
 
 def most_abundant_entry_selection(x, freq_organism):
@@ -136,8 +136,8 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    df_sel_1 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel=1)
-    df_sel_2 = organism_selection('test_files/mcE61_PD14_Figueres_Peptides.xlsx', sel=2)
+    df_sel_1 = organism_selection('test_files/mcE61_PD14_Control_Peptides.xlsx', sel=1)
+    df_sel_2 = organism_selection('test_files/mcE61_PD14_Control_Peptides.xlsx', sel=2)
 
     print('-----sel 1----------')
     print(df_sel_1)
