@@ -1,8 +1,15 @@
+import sys
+
 import numpy as np
 import load_archives
 import sqlite_requests as sr
 import pandas as pd
 
+# TODO: should be relocated on a common module and imported if needed
+def dprint(*this):
+    """To allow debugging with prints when using doctest"""
+    that = ''.join(str(item) for item in this)
+    print(that, file=sys.stderr)
 
 
 def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray, p_infor, s_infor,
@@ -103,10 +110,11 @@ def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray, p_inf, s_inf,
 def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0, intensity_power: float = 1.0, 
                        db = 'Aquasearch_study'):
     """Calculate cosine-like score by multiplying matches.
+
     Does require a sorted list of matching peaks (sorted by intensity product).
     """
 
-    score = float(0.0)
+    score = 0.0
     used_matches = int(0)
     unique_used = int(0)
     rep = np.empty((0, 6), int)
@@ -129,6 +137,7 @@ def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0, intens
             unique_used += matching_pairs[i, 5]
             arr = np.array([matching_pairs[i, 0], matching_pairs[i, 1], matching_pairs[i, 2], matching_pairs[i, 3],
                             matching_pairs[i, 4], matching_pairs[i, 5]]).transpose()
+
             signals_used = np.concatenate((signals_used, [arr]), axis=0)
           # If not, it is added to an array where the repeats will be
         else:
@@ -179,7 +188,8 @@ def score_best_matches(matching_pairs: np.ndarray, mz_power: float = 0.0, intens
         score += rep_def[i, 2]
         used_matches += 1
         unique_used += rep_def[i, 5]
-        arr = np.array([rep_def[i, 0], rep_def[i, 1], rep_def[i, 2], rep_def[i, 3], rep_def[i, 4], rep_def[i, 5]]).transpose()
+        arr = np.array([rep_def[i, 0], rep_def[i, 1], rep_def[i, 2], rep_def[i, 3], 
+                        rep_def[i, 4], rep_def[i, 5]]).transpose()
         signals_used = np.concatenate((signals_used, [arr]), axis=0)
     
     peptides = []  #Obtain the seq of the peptides used
@@ -258,17 +268,17 @@ def request_scores(request_txt, tolerance: float, shift: float = 0,
 if __name__ == '__main__':
     
     ####Esto irá dentro de otra función
-    database = load_archives.db_table_request()
-    table_ = database[6]
-    mz_intens = np.array(table_.iloc[:, [2, 3]])  #######Transformar
-    prot_inf = list(table_.iloc[:, 0])
-    seq_inf = list(table_.iloc[:, 1])
+    # database = load_archives.db_table_request()
+    # table_ = database[6]
+    # mz_intens = np.array(table_.iloc[:, [2, 3]])  #######Transformar
+    # prot_inf = list(table_.iloc[:, 0])
+    # seq_inf = list(table_.iloc[:, 1])
     
-    query1, query2 = load_archives.parse_txt_request('test_files/mcE61_Figueres.txt')
+    # query1, query2 = load_archives.parse_txt_request('test_files/mcE61_Figueres.txt')
     
-    m = find_matches(mz_intens[:, 0], mz_intens[:, 0], prot_inf, seq_inf, tolerance=0.05)
-    m2 = collect_peak_pairs(mz_intens, mz_intens, prot_inf, seq_inf,
-                            tolerance = 0.05, shift = 0, mz_power = 0.0,
-                            intensity_power = 1.0)
-    m3 = score_best_matches(m2, mz_power= 0.0, intensity_power = 1.0)
-    scores, su, pep = request_scores('test_program/pmf_B5.txt', tolerance= 0.05, shift= 0, mz_power= 0.0, intensity_power = 1.0, dat_b='Aquasearch_study')
+    # m = find_matches(mz_intens[:, 0], mz_intens[:, 0], prot_inf, seq_inf, tolerance=0.05)
+    # m2 = collect_peak_pairs(mz_intens, mz_intens, prot_inf, seq_inf,
+    #                         tolerance = 0.05, shift = 0, mz_power = 0.0,
+    #                         intensity_power = 1.0)
+    # m3 = score_best_matches(m2, mz_power= 0.0, intensity_power = 1.0)
+    scores, su, pep = request_scores('test_program/pmf_B1.txt', tolerance= 0.05, shift= 0, mz_power= 0.0, intensity_power = 1.0, dat_b='Aquasearch_study')
