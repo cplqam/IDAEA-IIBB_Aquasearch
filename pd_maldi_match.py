@@ -65,7 +65,6 @@ def maldi_ident_join(dictionary, maldi):
                        })
 
     for mz_k, value in dictionary.items():
-        # print(value)
         prot_name, org_name, accession, unique_pep, stand_signal, pep_seq, pep_mm = value[0].split('|')
 
         pos = numpy.where(mz_maldi == mz_k)[0]

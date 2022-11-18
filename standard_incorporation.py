@@ -172,9 +172,12 @@ def standard_complete_union(maldi, path_, code_prot, code_stand, sample, ppm = 1
        INPUT
        maldi: string. It is the path of the maldi file which needs to be completed
        path_: string. It is the path of the file whit the unique/non unique info
-       code: string. The uniprot code of the protein standad analyzed by MALDI-TOF
+       code_prot: string. The uniprot code of the protein standad analyzed by MALDI-TOF
+       code_stand: string. The name of the new estry resulting fron the union of 2 proteins
+       sample: string. The name of the sample
        ppm: integer. Maximum error allowed for considering signals as the same.
             By default --> ppm = 100
+       db: string. The name of the database
     """
     df_unique = xlsx_extraction(path_)
     df_unique = df_unique[df_unique['Code'] == code_prot]
@@ -268,5 +271,5 @@ if __name__ == '__main__':
     
     df_unique = xlsx_extraction(unique_path)
     
-    standard_complete(maldi_path, unique_path,'P08835', 'standard_1', 2, ppm = 100)
+    standard_complete(maldi_path, unique_path,'P08835', 'standard_1', ppm = 100)
     

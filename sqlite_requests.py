@@ -1,4 +1,5 @@
 import sqlite3 as sql
+import os
 
 def create_db(name):
     """"Creates a new SQLite3 database.
@@ -10,6 +11,28 @@ def create_db(name):
     cone.commit()
     cone.close()
        
+def create_db_by_user(name):
+    """"Creates a new SQLite3 database.
+
+        name: string. Name we want to assign to the DB
+    """
+    name2 = 'Aquasearch_study - ' + name
+    cone = sql.connect(name2)
+    cone.commit()
+    cone.close()
+    
+def db_request():
+    """Perform a request to know the datasets
+    """
+    list_files = os.listdir()
+    dbs = []
+    for file in list_files:
+        if 'Aquasearch_study' in file:
+            if '-' in file:
+                dbs.append(file.split('- ')[1])
+            else:
+                dbs.append(file)
+    return dbs
 
 # To create a protein dictionary
 def create_table_proteins_dic(name, table_n):
@@ -279,3 +302,51 @@ def consulta_prot_id(name, prot):
     datos = cur.fetchall()[0][0]  
     conn.close()
     return datos
+
+def consulta_prot_id_from_code(name, prot):
+    conn = sql.connect(name)
+    cur = conn.cursor()
+    cur.execute("SELECT id_ FROM Protein_codes WHERE Protein = '" + str(prot) + "'") 
+    datos = cur.fetchall()[0][0]
+    conn.close()
+    return datos
+
+def delete_prot_id(name, prot):
+    conn = sql.connect(name)
+    cur = conn.cursor()
+    cur.execute("DELETE FROM Protein_codes WHERE id_ = '" + str(prot) + "'") 
+    conn.commit()
+    conn.close()
+
+def delete_spetrums(name, prot):
+    conn = sql.connect(name)
+    cur = conn.cursor()
+    cur.execute("DELETE FROM Spectrums_table WHERE protein = " + str(prot) + "") 
+    conn.commit()
+    conn.close()
+    
+def delete_peptides(name, pep):
+    conn = sql.connect(name)
+    cur = conn.cursor()
+    cur.execute("DELETE FROM Peptide_sequences WHERE id_sequence = " + str(pep) + "") 
+    conn.commit()
+    conn.close()
+    
+def delete_sample(name, sample_name):
+    conn = sql.connect(name)
+    cur = conn.cursor()
+    cur.execute("DELETE FROM Spectrums_table WHERE sample = '" + str(sample_name) + "'") 
+    conn.commit()
+    conn.close()
+    
+def consulta_spect(name, prot):
+    conn = sql.connect(name)
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Spectrums_table WHERE protein =" + str(prot) + "")
+    datos = cur.fetchall() 
+    conn.close()
+    return datos
+    
+if __name__ == "__main__":
+    # delete_prot_id('Aquasearch_study', 1)
+    a = consulta_spect('Aquasearch_study', 3)

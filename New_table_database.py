@@ -19,7 +19,7 @@ if m == 'n':
 
     ###### MIX   ####################################################
     codes = ['P04746','P08835','P0DUB6','P19961','P02769','P19121','P02768','P14639',
-             'P35747','P07724','P00687','P02770','Q5XLE4','P00689','P49065']
+             'P35747','P49065']
 
     for code in codes:
         print(code)
@@ -38,18 +38,18 @@ if m == 'n':
                 print(1)
 
     ###### STANDARDS ##########################################
-    si.standard_complete('test_files/Standares/pmf_H1.txt', path_2_stand,'P07724',
-                         'standard_mouse_alb_1')
-    si.standard_complete('test_files/Standares/pmf_H2.txt', path_2_stand,'P07724',
-                         'standard_mouse_alb_2')
-    si.standard_complete('test_files/Standares/pmf_H3.txt', path_2_stand,'P07724',
-                         'standard_mouse_alb_3')
-    si.standard_complete('test_files/Standares/pmf_H4.txt', path_2_stand,'P02770',
-                         'standard_rat_alb_1')
-    si.standard_complete('test_files/Standares/pmf_H5.txt', path_2_stand,'P02770',
-                         'standard_rat_alb_2')
-    si.standard_complete('test_files/Standares/pmf_H6.txt', path_2_stand,'P02770',
-                         'standard_rat_alb_3')
+    # si.standard_complete('test_files/Standares/pmf_H1.txt', path_2_stand,'P07724',
+    #                      'standard_mouse_alb_1')
+    # si.standard_complete('test_files/Standares/pmf_H2.txt', path_2_stand,'P07724',
+    #                      'standard_mouse_alb_2')
+    # si.standard_complete('test_files/Standares/pmf_H3.txt', path_2_stand,'P07724',
+    #                      'standard_mouse_alb_3')
+    # si.standard_complete('test_files/Standares/pmf_H4.txt', path_2_stand,'P02770',
+    #                      'standard_rat_alb_1')
+    # si.standard_complete('test_files/Standares/pmf_H5.txt', path_2_stand,'P02770',
+    #                      'standard_rat_alb_2')
+    # si.standard_complete('test_files/Standares/pmf_H6.txt', path_2_stand,'P02770',
+    #                      'standard_rat_alb_3')
     si.standard_complete('test_files/Standares/pmf_H7.txt', path_2_stand,'P02768',
                          'standard_human_alb_1')
     si.standard_complete('test_files/Standares/pmf_H8.txt', path_2_stand,'P02768',
@@ -97,15 +97,15 @@ elif m == 'y':
             ps.table_union(new, codes[0],codes[1], test_pdmm, code_sample)
             print(1)
 
-    si.standard_complete_union('test_files/Standares/pmf_H1.txt', path_2_stand, 'P07724',
-                               'Murid albumin (P07724;P02770)', 'stand_murid_albu_1')
-    si.standard_complete_union('test_files/Standares/pmf_H2.txt', path_2_stand, 'P07724',
-                               'Murid albumin (P07724;P02770)', 'stand_murid_albu_2')
-    si.standard_complete_union('test_files/Standares/pmf_H3.txt', path_2_stand, 'P07724',
-                               'Murid albumin (P07724;P02770)', 'stand_murid_albu_3')
-    si.standard_complete_union('test_files/Standares/pmf_H4.txt', path_2_stand, 'P02770',
-                               'Murid albumin (P07724;P02770)', 'stand_murid_albu_4')
-    si.standard_complete_union('test_files/Standares/pmf_H5.txt', path_2_stand, 'P02770',
-                               'Murid albumin (P07724;P02770)', 'stand_murid_albu_5')
-    si.standard_complete_union('test_files/Standares/pmf_H6.txt', path_2_stand, 'P02770',
-                               'Murid albumin (P07724;P02770)', 'stand_murid_albu_6')
+    # si.standard_complete_union('test_files/Standares/pmf_H1.txt', path_2_stand, 'P07724',
+    #                            'Murid albumin (P07724;P02770)', 'stand_murid_albu_1')
+    # si.standard_complete_union('test_files/Standares/pmf_H2.txt', path_2_stand, 'P07724',
+    #                            'Murid albumin (P07724;P02770)', 'stand_murid_albu_2')
+    # si.standard_complete_union('test_files/Standares/pmf_H3.txt', path_2_stand, 'P07724',
+    #                            'Murid albumin (P07724;P02770)', 'stand_murid_albu_3')
+    # si.standard_complete_union('test_files/Standares/pmf_H4.txt', path_2_stand, 'P02770',
+    #                            'Murid albumin (P07724;P02770)', 'stand_murid_albu_4')
+    # si.standard_complete_union('test_files/Standares/pmf_H5.txt', path_2_stand, 'P02770',
+    #                            'Murid albumin (P07724;P02770)', 'stand_murid_albu_5')
+    # si.standard_complete_union('test_files/Standares/pmf_H6.txt', path_2_stand, 'P02770',
+    #                            'Murid albumin (P07724;P02770)', 'stand_murid_albu_6')

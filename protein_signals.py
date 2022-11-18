@@ -6,7 +6,7 @@ import numpy as np
 from collections import Counter
 
 
-def table_proteins_check(protein_code, db='Aquasearch_study'):
+def table_proteins_check(protein_code, db):
     """Checks if the database and a table with the protein accession code name exist.
        If any of them do not exist, it is created
 
@@ -36,7 +36,7 @@ def table_proteins_check(protein_code, db='Aquasearch_study'):
         
     return id_prot
     
-def table_sequence_check(sequence_prot, uniq, m_mass, db='Aquasearch_study'):
+def table_sequence_check(sequence_prot, uniq, m_mass, db):
     
     sr.table_sequences(db)
     table = sr.table_download(db, 'Peptide_sequences')
@@ -56,7 +56,7 @@ def table_sequence_check(sequence_prot, uniq, m_mass, db='Aquasearch_study'):
         
     return id_sequence
 
-def table_spectrum_check(signals, id_, db = 'Aquasearch_study'):
+def table_spectrum_check(signals, id_, db):
 
     sr.spectrums_table(db)
     sr.table_sequences(db)
@@ -88,12 +88,13 @@ def table_spectrum_check(signals, id_, db = 'Aquasearch_study'):
     return table_new
 
 
-def peptide_reevaluation(db='Aquasearch_study'):
+def peptide_reevaluation(db):
     
     table = sr.table_download(db, 'Spectrums_table')
     table = pd.DataFrame(table, columns= ('mz', 'relative_intensity', 
                                           'standard_signal', 'protein', 
                                           'sample', 'sequence'))
+
     no_unique = []
     n_peptides = np.unique(table['sequence'])
     for pep in n_peptides:
@@ -101,13 +102,17 @@ def peptide_reevaluation(db='Aquasearch_study'):
       proteins = list(np.unique(peptides['protein']))
       
       if len(proteins) > 1:
-          no_unique.append(pep-1)
+          no_unique.append(pep)
       
     table_pep = sr.table_download(db, 'Peptide_sequences')
     table_pep = pd.DataFrame(table_pep, columns= ('id', 'peptide_sequence', 
                                               'uniq', 'molecular_mass'))
-    table_pep.loc[no_unique, 'uniq'] = '0'
-    
+
+    idx_ = []
+    for i in no_unique:
+        idx_.append(list(table_pep.loc[:, 'id']).index(i))
+    table_pep.loc[idx_, 'uniq'] = '0'
+
     sr.eliminate_table(db, 'Peptide_sequences')
     sr.table_sequences(db)
     for id_sequence, sequence_prot, uniq, m_mass in zip(table_pep['id'], table_pep['peptide_sequence'], table_pep['uniq'], table_pep['molecular_mass']):
@@ -115,7 +120,7 @@ def peptide_reevaluation(db='Aquasearch_study'):
       
 
 
-def quality_filter(db='Aquasearch_study'):
+def quality_filter(db):
     sr.spectrums_table_filtered(db)
     table = sr.table_download(db, 'Spectrums_table')
     table = pd.DataFrame(table, columns= ('mz', 'relative_intensity', 
@@ -124,7 +129,7 @@ def quality_filter(db='Aquasearch_study'):
     table_mix = table[table['standard_signal'] == '0']
     table_stand = table[table['standard_signal'] == '1']
 
-    table_mix['protein'] = list(map(int,(table_mix['protein'])))
+    table_mix['protein'] = list(map(int,(table_mix.loc[:, 'protein'])))
 
     spectrums_filtered = pd.DataFrame(columns= ('mz', 'relative_intensity', 
                                                 'standard_signal', 'protein', 
@@ -169,7 +174,7 @@ def quality_filter(db='Aquasearch_study'):
     sr.spectrums_table_filtered(db)
     sr.insert_new_spectrum_filtered(db, spectrums_filtered)
     
-def reference_spectrum(db='Aquasearch_study'):
+def reference_spectrum(db):
     
     sr.table_quant_inf(db)
     table = sr.table_download(db, 'Spectrums_table_filtered')
@@ -256,7 +261,7 @@ def relat_intensity_calc(table_):
     return table_final
     
 
-def fill_table(protein_code, maldi_complete, sample_name, db='Aquasearch_study', options=1):
+def fill_table(protein_code, maldi_complete, sample_name, db, options=1):
     """Creates or completes a table with the peptide signals belonging to protein <protein_code> in a protein mix.
 
        protein_code: string. The name of the table (protein accession code)
@@ -331,16 +336,16 @@ def fill_table(protein_code, maldi_complete, sample_name, db='Aquasearch_study',
     
     
     signals_inter.loc[:, 'Sample'] = [sample_name] * signals_inter.shape[0]           
-    id_p = table_proteins_check(protein_code)
+    id_p = table_proteins_check(protein_code, db)
     
     code_seq = []
     for seq, uniq, mass in zip(signals_inter.loc[:, 'Peptide seq'], signals_inter.loc[:, 'Unique Pep'], signals_inter.loc[:, 'Peptide mass']):
-        id_s = table_sequence_check(seq, uniq, mass)
+        id_s = table_sequence_check(seq, uniq, mass, db)
         code_seq.append(id_s)
     
     signals_inter.loc[:, 'Peptide seq'] = code_seq
 
-    table_examined = table_spectrum_check(signals_inter, id_p)
+    table_examined = table_spectrum_check(signals_inter, id_p, db)
     sr.eliminate_table(db, 'Spectrums_table')
     sr.spectrums_table(db)
     sr.insert_new_spectrum(db, table_examined)
@@ -350,7 +355,7 @@ def fill_table(protein_code, maldi_complete, sample_name, db='Aquasearch_study',
     peptide_reevaluation(db)  
 
 
-def table_union(new, old1, old2, signals, sample_name, db='Aquasearch_study'):
+def table_union(new, old1, old2, signals, sample_name, db):
     """Selects the peptide signals of 2 different proteins in the same group
 
        old1: string. The name of one protein you want to combine
@@ -460,17 +465,17 @@ def table_union(new, old1, old2, signals, sample_name, db='Aquasearch_study'):
                                           'Unique Pep': uni,'Standard signal': stand, 'Peptide seq': seq,
                                           'Peptide mass': m_mass})
 
-        id_p = table_proteins_check(new)    
+        id_p = table_proteins_check(new, db)    
         code_seq = []
         for seq, uniq, mass in zip(signals_interest.loc[:, 'Peptide seq'], signals_interest.loc[:, 'Unique Pep'], signals_interest.loc[:, 'Peptide mass']):
-            id_s = table_sequence_check(seq, uniq, mass)
+            id_s = table_sequence_check(seq, uniq, mass, db)
             code_seq.append(id_s)
 
         signals_interest.loc[:, 'Peptide seq'] = code_seq
         signals_interest['Sample'] = [sample_name] * signals_interest.shape[0]
 
 
-        table_examined = table_spectrum_check(signals_interest, id_p)
+        table_examined = table_spectrum_check(signals_interest, id_p, db)
         sr.eliminate_table(db, 'Spectrums_table')
         sr.spectrums_table(db)
         sr.insert_new_spectrum(db, table_examined)

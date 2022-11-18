@@ -4,22 +4,22 @@ import numpy
 import sqlite_requests as sr
 
 # To import the tables from database
-def db_table_request():
+def db_table_request(db):
     """This function import a table from a SQLite dataset
 
-        >>> res = db_table_request()
-        >>> len(res) == list(res.keys())[-1]
+        >>> res = db_table_request('Aquasearch_study')
+        >>> max(res) == list(res.keys())[-1]
         True
 
     """
-    table = sr.table_download('Aquasearch_study', 'Quantitative_information')
+    table = sr.table_download(db, 'Quantitative_information')
     table = pd.DataFrame(table, columns=('protein', 'sequence', 'mz', 'intensity'))
     dic = {}
 
-    n_prot = map(int,table['protein'])
-    max_prot = max(n_prot)
-    for num in range(int(max_prot)):
-        num = num + 1
+    n_prot = set(map(int,table['protein']))
+    proteins = list(n_prot)
+    proteins.sort()
+    for num in list(proteins):
         dic[num] = table[table['protein'] == str(num)]
 
     return dic
@@ -109,6 +109,6 @@ if __name__ == '__main__':
     prueba, prueba_2 = parse_txt('test_files/Standares/pmf_H1_completed.txt')
     df, mz_int = parse_xml('test_files/mcE61_Figueres.xml')
     try:
-        results = db_table_request()
+        results = db_table_request('Aquasearch_study')
     except ValueError:
         print('no existen las tablas')
