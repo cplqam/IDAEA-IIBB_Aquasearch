@@ -79,7 +79,7 @@ def maldi_ident_join(dictionary, maldi):
     return df
 
 
-def txt_complete(txt_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
+def txt_complete(txt_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1, dat_b ='Aquasearch_study'):
     """Assigns the protein and organism name to the MALDI spectrum signals
 
        >>> result = txt_complete('test_files/mcE61_Figueres.txt', 'test_files/mcE61_PD14_Figueres_Peptides.xlsx', 'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, unique_=1)
@@ -117,9 +117,9 @@ def txt_complete(txt_, ident_pep, ident_prot, n_=250, ppm=100, unique_=1):
 
     dictionary = {}
     if unique_:
-        identifications = pd_table_selection.organism_selection(ident_pep, sel=2)
+        identifications = pd_table_selection.organism_selection(ident_pep, sel=2, db = dat_b)
     else:
-        identifications = pd_table_selection.organism_selection(ident_pep, sel=1)
+        identifications = pd_table_selection.organism_selection(ident_pep, sel=1, db = dat_b)
 
     for ion in mz_int:
         mz_txt = ion[0]
@@ -215,5 +215,6 @@ if __name__ == '__main__':
     cm.console_wide_view()
     result_1 = txt_complete('test_files/mcE61_Figueres.txt',
                             'test_files/mcE61_PD14_Figueres_Peptides.xlsx',
-                            'test_files/mcE61_PD14_Figueres_Proteins.xlsx', n_=100, ppm = 100, unique_=1)
+                            'test_files/mcE61_PD14_Figueres_Proteins.xlsx', 
+                            n_=100, ppm = 100, unique_=1, dat_b = 'Aquasearch_study')
 

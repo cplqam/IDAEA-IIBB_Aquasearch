@@ -15,9 +15,9 @@ def protein_elimination(db, protein):
     id_ = sr.consulta_prot_id_from_code(db, protein)
     sr.delete_prot_id(db, id_)
     
-    spectrums = sr. consulta_spect(db, id_)
-    spectrums = pd.DataFrame(spectrums, columns=['mz', 'intensity', 'standard', 'protein', 'sample', 'peptide'])
-    peptides = spectrums.loc[:, 'peptide'].unique()
+    spectra = sr. consulta_spect(db, id_)
+    spectra = pd.DataFrame(spectra, columns=['mz', 'intensity', 'standard', 'protein', 'sample', 'peptide'])
+    peptides = spectra.loc[:, 'peptide'].unique()
     
     table_quantitative = sr.table_download(db, 'Quantitative_information')
     table_quantitative = pd.DataFrame(table_quantitative, columns= ['protein', 'sequence', 'mz', 'intensity'])

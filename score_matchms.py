@@ -263,7 +263,7 @@ def request_scores(request_txt, tolerance: float, shift: float = 0,
                                          intensity_power)
         
             protein = sr.consulta_prot_id(dat_b, n)
-            data = sr.table_request_prot_dict('Aquasearch_study', 'protein_dictionary', protein)
+            data = sr.table_request_prot_dict(dat_b, 'protein_dictionary', protein)
             
             try:
                 score_r, used_m, unique_m, peptides_res = score_best_matches(matches, mz_power, intensity_power, dat_b) 
@@ -281,7 +281,7 @@ def request_scores(request_txt, tolerance: float, shift: float = 0,
             pass
         except ValueError:
             protein = sr.consulta_prot_id(dat_b, n)
-            data = sr.table_request_prot_dict('Aquasearch_study', 'protein_dictionary', protein)
+            data = sr.table_request_prot_dict(dat_b, 'protein_dictionary', protein)
             if not data:
                 scores[protein] = [['-', '-', 0, 0, 0],[0, 0]]
             else:

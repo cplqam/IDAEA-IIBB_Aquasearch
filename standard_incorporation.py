@@ -29,7 +29,7 @@ def xlsx_extraction(path_):
     df_unique = df_unique.loc[:,['protein', 'peptide', 'unique']]
     
     
-    df_mz = pd.read_excel(path_, sheet_name = 2) 
+    df_mz = pd.read_excel(path_, sheet_name = 1) 
     df_mz = df_mz.loc[:,['Number', 'm/z (mi)', 'm/z (av)', 'Sequence']]
 
     list_code = []
@@ -156,8 +156,8 @@ def standard_complete(maldi, path_, code, sample, ppm = 100, db = 'Aquasearch_st
     df_maldi.loc[:, 'Peptide seq'] = code_seq
     
     table_examined = ps.table_spectrum_check(df_maldi, id_p)
-    sr.eliminate_table(db, 'Spectrums_table')
-    sr.spectrums_table(db)
+    sr.eliminate_table(db, 'Spectra_table')
+    sr.spectra_table(db)
     sr.insert_new_spectrum(db, table_examined)
     
     ps.quality_filter(db)
@@ -247,8 +247,8 @@ def standard_complete_union(maldi, path_, code_prot, code_stand, sample, ppm = 1
     df_maldi.loc[:, 'Peptide seq'] = code_seq
 
     table_examined = ps.table_spectrum_check(df_maldi, id_p)
-    sr.eliminate_table(db, 'Spectrums_table')
-    sr.spectrums_table(db)
+    sr.eliminate_table(db, 'Spectra_table')
+    sr.spectra_table(db)
     sr.insert_new_spectrum(db, table_examined)
 
     ps.quality_filter(db)

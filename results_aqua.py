@@ -5,16 +5,18 @@
 #
 
 import wx
-from results_peptides import results_peptides
+from results_peptides import ResultsPeptides
+from wx.lib.agw import ultimatelistctrl as ulc
 # begin wxGlade: dependencies
 # end wxGlade
 
 # begin wxGlade: extracode
 # end wxGlade
+proteins = {'P08835': [['Albumin', 'Sus scrofa ', 4.9, 5, 0], ['abcd', 'No', 9.2]],
+            'P12345': [['Albumin', 'Invent', 2.9, 4, 0], ['pep1', 'Yes', 10]]}
 
-
-class results_aqua(wx.Frame):
-    def __init__(self, name, score, *args, **kwds):
+class ResultsAqua(wx.Frame):
+    def __init__(self, name, *args, **kwds):
         # begin wxGlade: results_aqua.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args, **kwds)
@@ -40,9 +42,9 @@ class results_aqua(wx.Frame):
 
         sizer_3 = wx.BoxSizer(wx.VERTICAL)
 
-        label_1 = wx.StaticText(self.panel_4, wx.ID_ANY, "Results of sample " + name)
-        label_1.SetFont(wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL, 0, "Segoe UI"))
-        sizer_3.Add(label_1, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
+        self.label_1 = wx.StaticText(self.panel_4, wx.ID_ANY, "Results of sample " + name)
+        self.label_1.SetFont(wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL, 0, "Segoe UI"))
+        sizer_3.Add(self.label_1, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
 
         self.panel_3 = wx.Panel(self.panel_1, wx.ID_ANY, style=wx.BORDER_STATIC)
         self.panel_3.SetBackgroundColour(wx.Colour(255, 255, 255))
@@ -50,47 +52,15 @@ class results_aqua(wx.Frame):
 
         sizer_5 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.list_results = wx.ListCtrl(self.panel_3, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_VRULES)
-        self.list_results.AppendColumn("Protein code", format=wx.LIST_FORMAT_LEFT, width= 110)
-        self.list_results.AppendColumn("Protein name", format=wx.LIST_FORMAT_LEFT, width= 130)
-        self.list_results.AppendColumn("Organism", format=wx.LIST_FORMAT_LEFT, width= 150)
-        self.list_results.AppendColumn("Score", format=wx.LIST_FORMAT_LEFT, width=80)
-        self.list_results.AppendColumn("Nº of peptides", format=wx.LIST_FORMAT_LEFT, width=90)
-        self.list_results.AppendColumn("Unique peptides", format=wx.LIST_FORMAT_LEFT, width=100)
+        self.ulist = ulc.UltimateListCtrl(self.panel_3, wx.ID_ANY, agwStyle=wx.LC_HRULES | wx.LC_REPORT | wx.LC_VRULES)
+        self.ulist.InsertColumn(col=0, heading="Protein code", format=wx.LIST_FORMAT_LEFT, width=110)
+        self.ulist.InsertColumn(col=1, heading="Protein name", format=wx.LIST_FORMAT_LEFT, width=130)
+        self.ulist.InsertColumn(col=2, heading="Organism", format=wx.LIST_FORMAT_LEFT, width=150)
+        self.ulist.InsertColumn(col=3, heading="Score", format=wx.LIST_FORMAT_LEFT, width=80)
+        self.ulist.InsertColumn(col=4, heading="Nº of peptides", format=wx.LIST_FORMAT_LEFT, width=90)
+        self.ulist.InsertColumn(col=5, heading="Unique peptides", format=wx.LIST_FORMAT_LEFT, width=100)
         
-        
-        for protein in zip(score.keys(), score.values()):
-            index = self.list_results.InsertItem(self.list_results.GetItemCount(), protein[0])
-            scores_ = protein[1][0]
-            for n_col, sco in enumerate(scores_):
-                item = wx.ListItem()
-                item.SetId(index)
-                item.SetColumn(n_col+1)
-                item.SetText(str(sco))
-                if n_col == 1:
-                    # font = wx.Font(wx.FontInfo(9).Italic())
-                    # item.SetFont(font)
-                    self.list_results.SetItem(item)
-                    
-                else:
-                # print("itemText", item.GetText()) 
-                    self.list_results.SetItem(item) 
-                # self.list_results.SetItem(index, n_col+1, str(sco))
-                # if n_col == 2:
-                #     item = self.list_results.GetItem(index,2)
-                #     print("itemText", item.GetText())       
-                #     # Get its font, change it, and put it back:
-                #     font = item.GetFont()
-                #     font.SetWeight(wx.FONTWEIGHT_BOLD)
-                #     item.SetFont(font)
-                #     self.list_results.SetItem(item, index, 2)  
-
-  
-                
-        # self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.list_results, self.peptides_display)
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, lambda evt, temp=score: self.peptides_display(evt, temp))
-            
-        sizer_5.Add(self.list_results, 1, wx.EXPAND, 0)
+        sizer_5.Add(self.ulist, 1, wx.EXPAND, 0)
 
         self.panel_5 = wx.Panel(self.panel_1, wx.ID_ANY)
         self.panel_5.SetMinSize((-1, 30))
@@ -121,7 +91,7 @@ class results_aqua(wx.Frame):
     def peptides_display(self, event, s):
         protein = event.GetText()
         a = s[protein][1]
-        self.Results = results_peptides(protein,a, None, wx.ID_ANY, "")
+        self.Results = ResultsPeptides(protein,a, None, wx.ID_ANY, "")
         
         self.Results.Show()
         
@@ -130,7 +100,7 @@ class results_aqua(wx.Frame):
 
 class MyApp(wx.App):
     def OnInit(self):
-        self.Results = results_aqua(None, wx.ID_ANY, "")
+        self.Results = ResultsAqua(self, wx.ID_ANY, "")
         self.SetTopWindow(self.Results)
         self.Results.Show()
         return True

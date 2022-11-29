@@ -58,9 +58,9 @@ def table_sequence_check(sequence_prot, uniq, m_mass, db):
 
 def table_spectrum_check(signals, id_, db):
 
-    sr.spectrums_table(db)
+    sr.spectra_table(db)
     sr.table_sequences(db)
-    table_spect = sr.table_download(db, 'Spectrums_table')  
+    table_spect = sr.table_download(db, 'Spectra_table')  
     
     table_spect = pd.DataFrame(table_spect, columns= ('mz', 'relative_intensity', 
                                                       'standard_signal', 'protein', 
@@ -90,7 +90,7 @@ def table_spectrum_check(signals, id_, db):
 
 def peptide_reevaluation(db):
     
-    table = sr.table_download(db, 'Spectrums_table')
+    table = sr.table_download(db, 'Spectra_table')
     table = pd.DataFrame(table, columns= ('mz', 'relative_intensity', 
                                           'standard_signal', 'protein', 
                                           'sample', 'sequence'))
@@ -121,8 +121,8 @@ def peptide_reevaluation(db):
 
 
 def quality_filter(db):
-    sr.spectrums_table_filtered(db)
-    table = sr.table_download(db, 'Spectrums_table')
+    sr.spectra_table_filtered(db)
+    table = sr.table_download(db, 'Spectra_table')
     table = pd.DataFrame(table, columns= ('mz', 'relative_intensity', 
                                           'standard_signal', 'protein', 
                                           'sample', 'sequence'))
@@ -131,7 +131,7 @@ def quality_filter(db):
 
     table_mix['protein'] = list(map(int,(table_mix.loc[:, 'protein'])))
 
-    spectrums_filtered = pd.DataFrame(columns= ('mz', 'relative_intensity', 
+    spectra_filtered = pd.DataFrame(columns= ('mz', 'relative_intensity', 
                                                 'standard_signal', 'protein', 
                                                 'sample', 'sequence'))
 
@@ -156,28 +156,28 @@ def quality_filter(db):
                 
                 if threshold != 1:
                     if (len(each_sample) >= threshold) & (len(each_sample) > 1): #or (each_sample.iloc[0,2] == '1'):
-                        spectrums_filtered = pd.concat([spectrums_filtered, each_sample], ignore_index=True)
+                        spectra_filtered = pd.concat([spectra_filtered, each_sample], ignore_index=True)
                     else:
                         pass
                 else:
                     if (len(each_sample) >= threshold):
-                        spectrums_filtered = pd.concat([spectrums_filtered, each_sample], ignore_index=True)
+                        spectra_filtered = pd.concat([spectra_filtered, each_sample], ignore_index=True)
                     else:
                         pass
 
 
-    spectrums_filtered = pd.concat([spectrums_filtered, table_stand], ignore_index=True)
-    spectrums_filtered = spectrums_filtered.sort_values(by=['mz'], ascending=True)
+    spectra_filtered = pd.concat([spectra_filtered, table_stand], ignore_index=True)
+    spectra_filtered = spectra_filtered.sort_values(by=['mz'], ascending=True)
 
 
-    sr.eliminate_table(db, 'Spectrums_table_filtered')
-    sr.spectrums_table_filtered(db)
-    sr.insert_new_spectrum_filtered(db, spectrums_filtered)
+    sr.eliminate_table(db, 'Spectra_table_filtered')
+    sr.spectra_table_filtered(db)
+    sr.insert_new_spectrum_filtered(db, spectra_filtered)
     
 def reference_spectrum(db):
     
     sr.table_quant_inf(db)
-    table = sr.table_download(db, 'Spectrums_table_filtered')
+    table = sr.table_download(db, 'Spectra_table_filtered')
     table = pd.DataFrame(table, columns= ('mz', 'relative_intensity', 
                                           'standard_signal', 'protein', 
                                           'sample', 'sequence'))
@@ -346,8 +346,8 @@ def fill_table(protein_code, maldi_complete, sample_name, db, options=1):
     signals_inter.loc[:, 'Peptide seq'] = code_seq
 
     table_examined = table_spectrum_check(signals_inter, id_p, db)
-    sr.eliminate_table(db, 'Spectrums_table')
-    sr.spectrums_table(db)
+    sr.eliminate_table(db, 'Spectra_table')
+    sr.spectra_table(db)
     sr.insert_new_spectrum(db, table_examined)
     
     quality_filter(db)
@@ -362,8 +362,9 @@ def table_union(new, old1, old2, signals, sample_name, db):
        old2: string. The name of the other protein you want to combine
        signals: Dataframe. The result from pd_maldi_match.txt_complete.py
        db: string. The name of the database
-    """
+    """        
     new = new + ' (' + old1 + ';' + old2 + ')'
+    new = new.replace(' ', '_')  
     protein_codes = signals['Protein Accession code']
     protein_codes = protein_codes.tolist()
     mz = []
@@ -476,8 +477,8 @@ def table_union(new, old1, old2, signals, sample_name, db):
 
 
         table_examined = table_spectrum_check(signals_interest, id_p, db)
-        sr.eliminate_table(db, 'Spectrums_table')
-        sr.spectrums_table(db)
+        sr.eliminate_table(db, 'Spectra_table')
+        sr.spectra_table(db)
         sr.insert_new_spectrum(db, table_examined)
         
         quality_filter(db)

@@ -1,7 +1,7 @@
 from collections import Counter
 import pd_table_complete as pdis
 
-def organism_selection(path__, sel=1):
+def organism_selection(path__, sel=1, db = 'Aquasearch_study'):
     """Completes the peptide output from Proteome Discoverer with the protein and
         organism they belong to, and it selects 1 option among the options of the
         non-unique peptides
@@ -24,7 +24,7 @@ def organism_selection(path__, sel=1):
             sel = 2: all the possibilities are considered for non-unique peptides
     """
 
-    df = pdis.protein_information(path__)
+    df = pdis.protein_information(path__, db)
     
     if sel == 2:
         uniques = []
@@ -136,8 +136,8 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    df_sel_1 = organism_selection('test_files/mcE61_PD14_Control_Peptides.xlsx', sel=1)
-    df_sel_2 = organism_selection('test_files/mcE61_PD14_Control_Peptides.xlsx', sel=2)
+    df_sel_1 = organism_selection('test_files/mcE61_PD14_Control_Peptides.xlsx', sel=1, db = 'Aquasearch_study')
+    df_sel_2 = organism_selection('test_files/mcE61_PD14_Control_Peptides.xlsx', sel=2, db = 'Aquasearch_study')
 
     print('-----sel 1----------')
     print(df_sel_1)

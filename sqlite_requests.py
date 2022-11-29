@@ -133,10 +133,10 @@ def table_request_prot_dict(name, table_n, code):
     conn.close()
     return datos
     
-def spectrums_table(name):
+def spectra_table(name):
     conn = sql.connect(name)
     cursor = conn.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS Spectrums_table (
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Spectra_table (
                       mz real,
                       relative_intensity real, 
                       standard_signal text,
@@ -170,7 +170,7 @@ def insert_new_spectrum(name, signals_i):
     conn = sql.connect(name)
     df_def = df_2_list_of_tuples(signals_i)
     cursor = conn.cursor()
-    instruction = "INSERT INTO Spectrums_table VALUES (?,?,?,?,?,?)" 
+    instruction = "INSERT INTO Spectra_table VALUES (?,?,?,?,?,?)" 
     cursor.executemany(instruction, df_def)
     conn.commit()
     conn.close()
@@ -255,10 +255,10 @@ def new_sequence(name, seq, _id, uni, mass):
     conn.commit()
     conn.close()
     
-def spectrums_table_filtered(name):
+def spectra_table_filtered(name):
     conn = sql.connect(name)
     cursor = conn.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS Spectrums_table_filtered (
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Spectra_table_filtered (
                       mz real,
                       relative_intensity real, 
                       standard_signal text,
@@ -274,7 +274,7 @@ def insert_new_spectrum_filtered(name, signals_i):
     conn = sql.connect(name)
     df_def = df_2_list_of_tuples(signals_i)
     cursor = conn.cursor()
-    instruction = "INSERT INTO Spectrums_table_filtered VALUES (?,?,?,?,?,?)" 
+    instruction = "INSERT INTO Spectra_table_filtered VALUES (?,?,?,?,?,?)" 
     cursor.executemany(instruction, df_def)
     conn.commit()
     conn.close()
@@ -321,7 +321,7 @@ def delete_prot_id(name, prot):
 def delete_spetrums(name, prot):
     conn = sql.connect(name)
     cur = conn.cursor()
-    cur.execute("DELETE FROM Spectrums_table WHERE protein = " + str(prot) + "") 
+    cur.execute("DELETE FROM Spectra_table WHERE protein = " + str(prot) + "") 
     conn.commit()
     conn.close()
     
@@ -335,14 +335,14 @@ def delete_peptides(name, pep):
 def delete_sample(name, sample_name):
     conn = sql.connect(name)
     cur = conn.cursor()
-    cur.execute("DELETE FROM Spectrums_table WHERE sample = '" + str(sample_name) + "'") 
+    cur.execute("DELETE FROM Spectra_table WHERE sample = '" + str(sample_name) + "'") 
     conn.commit()
     conn.close()
     
 def consulta_spect(name, prot):
     conn = sql.connect(name)
     cur = conn.cursor()
-    cur.execute("SELECT * FROM Spectrums_table WHERE protein =" + str(prot) + "")
+    cur.execute("SELECT * FROM Spectra_table WHERE protein =" + str(prot) + "")
     datos = cur.fetchall() 
     conn.close()
     return datos

@@ -13,12 +13,12 @@ import wx
 # end wxGlade
 
 
-class results_peptides(wx.Frame):
-    def __init__(self, protein, s, *args, **kwds):
+class ResultsPeptides(wx.Frame):
+    def __init__(self, protein, *args, **kwds):
         # begin wxGlade: results_aqua.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args, **kwds)
-        self.SetSize((300, 400))
+        self.SetSize((350, 400))
         self.SetTitle("Aquasearch results")
         _icon = wx.NullIcon
         _icon.CopyFromBitmap(wx.Bitmap("Icon.png", wx.BITMAP_TYPE_ANY))
@@ -40,9 +40,9 @@ class results_peptides(wx.Frame):
 
         sizer_3 = wx.BoxSizer(wx.VERTICAL)
 
-        label_1 = wx.StaticText(self.panel_4, wx.ID_ANY, "Peptides of sample " + protein)
-        label_1.SetFont(wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL, 0, "Segoe UI"))
-        sizer_3.Add(label_1, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
+        self.label_1 = wx.StaticText(self.panel_4, wx.ID_ANY, "Peptides of sample " + protein)
+        self.label_1.SetFont(wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL, 0, "Segoe UI"))
+        sizer_3.Add(self.label_1, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
 
         self.panel_3 = wx.Panel(self.panel_1, wx.ID_ANY, style=wx.BORDER_STATIC)
         self.panel_3.SetBackgroundColour(wx.Colour(255, 255, 255))
@@ -55,11 +55,10 @@ class results_peptides(wx.Frame):
         self.list_results.AppendColumn("Unique", format=wx.LIST_FORMAT_LEFT, width=70)
         self.list_results.AppendColumn("Error (ppm)", format=wx.LIST_FORMAT_LEFT, width=70)
         
-        for pos in range(s.shape[0]):
-            index = self.list_results.InsertItem(self.list_results.GetItemCount(), s.iloc[pos,0])
-            # for n_col, sco in enumerate(peptide[1]):
-            self.list_results.SetItem(index, 1, str(s.iloc[pos,1]))
-            self.list_results.SetItem(index, 2, str(s.iloc[pos,2]))
+        # for pos in range(s.shape[0]):
+        #     index = self.list_results.InsertItem(self.list_results.GetItemCount(), s.iloc[pos,0])
+        #     self.list_results.SetItem(index, 1, str(s.iloc[pos,1]))
+        #     self.list_results.SetItem(index, 2, str(s.iloc[pos,2]))
             
         sizer_5.Add(self.list_results, 1, wx.EXPAND, 0)
 
@@ -94,7 +93,7 @@ class results_peptides(wx.Frame):
 
 class MyApp(wx.App):
     def OnInit(self):
-        self.Results = results_peptides(None, wx.ID_ANY, "")
+        self.Results = ResultsPeptides(None, wx.ID_ANY, "")
         self.SetTopWindow(self.Results)
         self.Results.Show()
         return True
