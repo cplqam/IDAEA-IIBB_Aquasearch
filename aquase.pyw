@@ -309,6 +309,10 @@ class AquasearchFrame(MainAquasearch):
         except sqlite3.OperationalError: 
             wx.MessageBox('Error: No database selected', 'Info', wx.OK | wx.ICON_INFORMATION)
             wx.EndBusyCursor()
+        except UnicodeDecodeError:
+            wx.MessageBox('Error: A txt file with MALDI-TOF results have to be selected',
+                          'Info', wx.OK | wx.ICON_INFORMATION)
+            wx.EndBusyCursor()
         
     def on_bt_plot(self, evt):
         try: 
@@ -407,7 +411,7 @@ class AquasearchFrame(MainAquasearch):
             wx.MessageBox('Error: No file pathway selected', 'Info', wx.OK | wx.ICON_INFORMATION)
             wx.EndBusyCursor()
         except ValueError:
-            wx.MessageBox('Error: Select all the parameters', 'Info', wx.OK | wx.ICON_INFORMATION)
+            wx.MessageBox('Error: Select correctly all the parameters', 'Info', wx.OK | wx.ICON_INFORMATION)
             wx.EndBusyCursor()
         
     def on_bt_1pt_std(self, evt):
@@ -438,7 +442,7 @@ class AquasearchFrame(MainAquasearch):
             wx.MessageBox('Error: No file pathway selected', 'Info', wx.OK | wx.ICON_INFORMATION)
             wx.EndBusyCursor()
         except ValueError:
-            wx.MessageBox('Error: Select all the parameters', 'Info', wx.OK | wx.ICON_INFORMATION)
+            wx.MessageBox('Error: Select correctly all the parameters', 'Info', wx.OK | wx.ICON_INFORMATION)
             wx.EndBusyCursor()
         
     def on_bt_2pt_mix(self, evt):
@@ -508,7 +512,7 @@ class AquasearchFrame(MainAquasearch):
             wx.MessageBox('Error: No file pathway selected', 'Info', wx.OK | wx.ICON_INFORMATION)
             wx.EndBusyCursor()
         except ValueError:
-            wx.MessageBox('Error: Select all the parameters', 'Info', wx.OK | wx.ICON_INFORMATION)
+            wx.MessageBox('Error: Select correctly all the parameters', 'Info', wx.OK | wx.ICON_INFORMATION)
             wx.EndBusyCursor()
     
     def on_bt_2pt_std(self, evt):
@@ -541,7 +545,7 @@ class AquasearchFrame(MainAquasearch):
             wx.MessageBox('Error: No file pathway selected', 'Info', wx.OK | wx.ICON_INFORMATION)
             wx.EndBusyCursor()
         except ValueError:
-            wx.MessageBox('Error: Select all the parameters', 'Info', wx.OK | wx.ICON_INFORMATION)
+            wx.MessageBox('Error: Select correctly all the parameters', 'Info', wx.OK | wx.ICON_INFORMATION)
             wx.EndBusyCursor()
             
     def draw_3d(self, evt, data_matrix, var, x_value, y_value, z_value, title, size_point, sample_names):
@@ -643,7 +647,7 @@ class AquasearchFrame(MainAquasearch):
         self.results_sample = ResultsAqua(name, None, wx.ID_ANY, "")
         
         new_proteins = []
-        font = wx.Font(9, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL)
+        font = wx.Font(8, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL)
         for proteins in zip(score.keys(), score.values()):
             tup = (proteins[0], proteins[1][0][0], proteins[1][0][1], str(proteins[1][0][2]), str(proteins[1][0][3]), 
                     str(proteins[1][0][4]))

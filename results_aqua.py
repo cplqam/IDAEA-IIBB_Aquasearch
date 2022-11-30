@@ -5,7 +5,6 @@
 #
 
 import wx
-from results_peptides import ResultsPeptides
 from wx.lib.agw import ultimatelistctrl as ulc
 # begin wxGlade: dependencies
 # end wxGlade
@@ -86,15 +85,7 @@ class ResultsAqua(wx.Frame):
         # end wxGlade
     def onclick(self, e):
         # EXITS APPLICATION ON CLICKING EXIT BUTTON
-        self.Close()
-    
-    def peptides_display(self, event, s):
-        protein = event.GetText()
-        a = s[protein][1]
-        self.Results = ResultsPeptides(protein,a, None, wx.ID_ANY, "")
-        
-        self.Results.Show()
-        
+        self.Close()        
     
 # end of class results_aqua
 
