@@ -150,7 +150,6 @@ def quality_filter(db):
             threshold = round(signals_mean - signals_std*0.75, 0)
         
             list_samples = np.unique(list(signals_protein['sample']))
-        
             for samp in list_samples:
                 each_sample = signals_protein[signals_protein['sample'] == samp]
                 
@@ -207,14 +206,12 @@ def reference_spectrum(db):
         list_signals['error ri'] = error_ri
         error_ri = list(map(int,error_ri < std_ri))
         condition = 1
-        
         while condition == 1:
             if list_signals.shape[0] >= 3 & sum(error_ri) >= 2:
                 errores_signals = list(list_signals['error ri'])
                 
                 idx_ = list(map(int, errores_signals >= std_ri))
                 idx_2 = idx_.index(1)
-                
                 if sum(idx_) >= 1:
                 
                     list_signals = list_signals.drop(list_signals.index[[idx_2]])

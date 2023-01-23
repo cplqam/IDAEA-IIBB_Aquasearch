@@ -317,9 +317,9 @@ class AquasearchFrame(MainAquasearch):
     def on_bt_plot(self, evt):
         try: 
             self.clean_plot()
-        
+            
+            wx.BeginBusyCursor(wx.Cursor(wx.CURSOR_ARROWWAIT))
             if not self.dic_s:
-                wx.BeginBusyCursor(wx.Cursor(wx.CURSOR_ARROWWAIT))
                 self.dic_s = self.calculate_dict()
                 wx.EndBusyCursor()
         
@@ -339,6 +339,7 @@ class AquasearchFrame(MainAquasearch):
             else:
                 data_matrix, vari, samp_nam = PCA_analysis.PCA_3d(self.dic_s, n_pcs)
                 self.draw_3d(self, data_matrix, vari, pc_x, pc_y, int(pc_z), title, point_size, samp_nam)
+            wx.EndBusyCursor()
                 
         except sqlite3.OperationalError: 
             wx.MessageBox('Error: No database selected', 'Info', wx.OK | wx.ICON_INFORMATION)
@@ -346,9 +347,17 @@ class AquasearchFrame(MainAquasearch):
         except FileNotFoundError:
             wx.MessageBox('Error: No file pathway selected', 'Info', wx.OK | wx.ICON_INFORMATION)
             wx.EndBusyCursor()
-        except ValueError:
-            wx.MessageBox('Error: Select all PC correctly', 'Info', wx.OK | wx.ICON_INFORMATION)
-            wx.EndBusyCursor()
+        except ValueError as err:
+            if "invalid literal for int() with base 10: ''" in str(err):
+                wx.MessageBox('Error: Select all PC correctly', 'Info', wx.OK | wx.ICON_INFORMATION)
+                wx.EndBusyCursor()
+            elif "Input X contains NaN" in str(err):
+                wx.MessageBox("""Error: PCA analysis can not be run if any sample has no identifications. 
+                              Remove this/these sample/s and repeat the analysis""",
+                              'Info', wx.OK | wx.ICON_INFORMATION)
+                wx.EndBusyCursor()
+        
+                
             
     def on_bt_1pt_mix(self, evt):
         try:
