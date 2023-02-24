@@ -40,7 +40,7 @@ class ResultsPeptides(wx.Frame):
 
         sizer_3 = wx.BoxSizer(wx.VERTICAL)
 
-        self.label_1 = wx.StaticText(self.panel_4, wx.ID_ANY, "Peptides of sample " + protein)
+        self.label_1 = wx.StaticText(self.panel_4, wx.ID_ANY, "Peptides of protein " + protein)
         self.label_1.SetFont(wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL, 0, "Segoe UI"))
         sizer_3.Add(self.label_1, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
 

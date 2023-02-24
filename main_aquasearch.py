@@ -5,7 +5,6 @@
 
 import wx
 import wx.lib.filebrowsebutton as filebrowse
-from results_aqua import ResultsAqua
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.figure import Figure
 # begin wxGlade: dependencies
@@ -278,6 +277,20 @@ class MainAquasearch(wx.Frame):
 
         self.lc_samples = wx.ListCtrl(self.panel_17, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_LIST | wx.LC_VRULES)
         sizer_149.Add(self.lc_samples, 1, wx.EXPAND, 0)
+        
+        self.panel_32 = wx.Panel(self.panel_identif, wx.ID_ANY)
+        self.panel_32.SetMinSize((-1, 35))
+        self.panel_32.SetBackgroundColour(wx.Colour(243, 243, 243))
+        sizer_34.Add(self.panel_32, 0, wx.EXPAND, 0)
+
+        sizer_110 = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.panel_38 = wx.Panel(self.panel_32, wx.ID_ANY)
+        self.panel_38.SetMinSize((-1, 40))
+        sizer_110.Add(self.panel_38, 2, wx.EXPAND, 0)
+
+        self.export_all = wx.Button(self.panel_32, wx.ID_ANY, "Export")
+        sizer_110.Add(self.export_all, 0, wx.ALL | wx.EXPAND, 5)
 
         self.panel_23 = wx.Panel(self.panel_21, wx.ID_ANY, style=wx.BORDER_SIMPLE)
         sizer_33.Add(self.panel_23, 7, wx.EXPAND, 0)
@@ -1872,6 +1885,8 @@ class MainAquasearch(wx.Frame):
         self.panel_41.SetSizer(sizer_36)
 
         self.panel_23.SetSizer(sizer_35)
+        
+        self.panel_32.SetSizer(sizer_110)
 
         self.panel_17.SetSizer(sizer_149)
 

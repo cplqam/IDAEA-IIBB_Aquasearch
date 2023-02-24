@@ -25,6 +25,7 @@ import pandas as pd
 import sqlite3
 import db_elimination as dbe
 import help_strings as hs
+import exportation as ex
 
 
 
@@ -45,6 +46,8 @@ class AquasearchFrame(MainAquasearch):
         self.Bind(wx.EVT_BUTTON, self.down_plot, self.button_download)
         self.Bind(wx.EVT_BUTTON, self.on_bt_del_prot, self.btn_del_prot)
         self.Bind(wx.EVT_BUTTON, self.on_bt_del_sam, self.btn_del_sam)
+        self.Bind(wx.EVT_BUTTON, self.export_all_res, self.export_all)
+        self.Bind(wx.EVT_BUTTON, self.onclick_exit, self.button_exit)
 
         self.Bind(wx.EVT_COMBOBOX, self.on_selection_protein, self.cb_database_delete_prot)
         self.Bind(wx.EVT_COMBOBOX, self.on_selection_sample, self.cb_database_delete_sam)
@@ -356,6 +359,9 @@ class AquasearchFrame(MainAquasearch):
                               Remove this/these sample/s and repeat the analysis""",
                               'Info', wx.OK | wx.ICON_INFORMATION)
                 wx.EndBusyCursor()
+            else:
+                wx.MessageBox('Error: Something went wrong in PCA analysis', 'Info', wx.OK | wx.ICON_INFORMATION)
+                wx.EndBusyCursor()
         
                 
             
@@ -644,20 +650,37 @@ class AquasearchFrame(MainAquasearch):
                 plt.savefig(pathname)
             except IOError:
                 wx.LogError("Cannot save current data in file '%s'." % pathname)
+                
+    def export_all_res(self, evt):
+        with wx.FileDialog(self, "Save txt file", wildcard="txt files (*.txt)|*.txt",
+                       style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
+
+            if fileDialog.ShowModal() == wx.ID_CANCEL:
+                return     # the user changed their mind
+
+            # save the current contents in the file
+            pathname = fileDialog.GetPath()
+            try:
+                ex.multiple_exportation(self.dic_s, pathname)
+            except IOError:
+                wx.LogError("Cannot save current data in file '%s'." % pathname)
+        
     
     def fbbCallback(self, evt):
         pass
 
     def sample_display(self, event, dic_s):
         
-        name = event.GetText()
-        score = dic_s[name]
+        self.name = event.GetText()
+        self.score = dic_s[self.name]
         
-        self.results_sample = ResultsAqua(name, None, wx.ID_ANY, "")
+        self.results_sample = ResultsAqua(self.name, None, wx.ID_ANY, "")
+        
+        self.results_sample.Bind(wx.EVT_BUTTON, self.export, self.results_sample.btn_export)
         
         new_proteins = []
         font = wx.Font(8, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL)
-        for proteins in zip(score.keys(), score.values()):
+        for proteins in zip(self.score.keys(), self.score.values()):
             tup = (proteins[0], proteins[1][0][0], proteins[1][0][1], str(proteins[1][0][2]), str(proteins[1][0][3]), 
                     str(proteins[1][0][4]))
             new_proteins.append(tup)
@@ -674,9 +697,24 @@ class AquasearchFrame(MainAquasearch):
             item.SetFont(font)
             self.results_sample.ulist.SetItem(item)
         
-        self.results_sample.Bind(wx.EVT_LIST_ITEM_ACTIVATED, lambda evt, temp=score: self.peptides_display(evt, temp))
+        self.results_sample.Bind(wx.EVT_LIST_ITEM_ACTIVATED, lambda evt, temp=self.score: self.peptides_display(evt, temp))
         
         self.results_sample.Show()
+        
+        
+    def export(self, evt):
+        with wx.FileDialog(self, "Save txt file", wildcard="txt files (*.txt)|*.txt",
+                       style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
+
+            if fileDialog.ShowModal() == wx.ID_CANCEL:
+                return     # the user changed their mind
+
+            # save the current contents in the file
+            pathname = fileDialog.GetPath()
+            try:
+                ex.single_exportation(self.score, self.name, pathname)
+            except IOError:
+                wx.LogError("Cannot save current data in file '%s'." % pathname)
     
     
     def peptides_display(self, event, protein_inf):
@@ -694,7 +732,7 @@ class AquasearchFrame(MainAquasearch):
         self.results_protein.Show()
         
         
-    def onclick(self, evt):
+    def onclick_exit(self, evt):
         # EXITS APPLICATION ON CLICKING EXIT BUTTON
         self.Close()
         
