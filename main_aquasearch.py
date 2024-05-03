@@ -296,7 +296,7 @@ class MainAquasearch(wx.Frame):
 
         sizer_35 = wx.BoxSizer(wx.VERTICAL)
 
-        label_9 = wx.StaticText(self.panel_23, wx.ID_ANY, "Sample analysis")
+        label_9 = wx.StaticText(self.panel_23, wx.ID_ANY, "Results analysis")
         label_9.SetMinSize((-1, 40))
         label_9.SetFont(wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, 0, "Segoe UI"))
         sizer_35.Add(label_9, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.SHAPED, 0)
@@ -481,7 +481,7 @@ class MainAquasearch(wx.Frame):
 
         sizer_162 = wx.BoxSizer(wx.VERTICAL)
 
-        self.button_pca = wx.Button(self.panel_165, wx.ID_ANY, "Run")
+        self.button_pca = wx.Button(self.panel_165, wx.ID_ANY, "Apply")
         self.button_pca.SetFont(wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, 0, "Segoe UI"))
         sizer_162.Add(self.button_pca, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.SHAPED, 3)
 
